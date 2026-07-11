@@ -1,7 +1,7 @@
 // cloudfunctions/seedAllDemo/index.js — 全量演示数据灌入（运行时自动清空再灌入）
 // 种子集合：elderly / volunteers / call_records / training_materials / communication_tips / feedbacks
 // 所有演示数据的 _id 均为固定值，确保关联统计稳定
-// 通话记录：2026年2月~7月，每位志愿者每月5~20条，均匀分布不集中
+// 通话记录：2026年2月~7月11日，每位志愿者每月5~20条，均匀分布不集中
 const cloud = require('wx-server-sdk');
 
 cloud.init({
@@ -441,14 +441,14 @@ function generateCallRecords(elderlyList, volunteerIds) {
   const records = [];
   const volIds = volunteerIds && volunteerIds.length > 0 ? volunteerIds : [''];
 
-  // 2026 年 2 月 ~ 7 月（JS month: Feb=1, Mar=2, Apr=3, May=4, Jun=5, Jul=6）
+  // 2026 年 2 月 ~ 7 月（JS month 参数：Feb=1, Mar=2, Apr=3, May=4, Jun=5, Jul=6）
   const months = [
     { year: 2026, month: 1, days: 28 },  // Feb 2026（2026 不是闰年）
     { year: 2026, month: 2, days: 31 },  // Mar
     { year: 2026, month: 3, days: 30 },  // Apr
     { year: 2026, month: 4, days: 31 },  // May
     { year: 2026, month: 5, days: 30 },  // Jun
-    { year: 2026, month: 6, days: 31 },  // Jul
+    { year: 2026, month: 6, days: 11 },  // Jul（写死到 7 月 11 日）
   ];
 
   // 为每个志愿者维护一个 elderly 轮询索引，确保每位 volunteer 对 elderly 的覆盖尽量均衡
@@ -479,7 +479,7 @@ function generateCallRecords(elderlyList, volunteerIds) {
             ? 14 + Math.floor(Math.random() * 4)  // 14:00-17:xx
             : 18 + Math.floor(Math.random() * 2)); // 偶尔 18:00-19:xx
 
-        const startTime = new Date(year, month, day, hour, Math.floor(Math.random() * 60), 0, 0);
+        const startTime = new Date(Date.UTC(year, month, day, hour - 8, Math.floor(Math.random() * 60), 0));
 
         // 时长：10-35 分钟
         const durationMin = 10 + Math.floor(Math.random() * 26);
