@@ -2,7 +2,7 @@
 const { getDocument, queryCollection, updateDocument } = require('../../utils/cloud');
 const { getVolunteer } = require('../../utils/auth');
 const { CALL_STATUS, COLLECTIONS } = require('../../utils/constants');
-const { formatDate, formatFullDate, formatRelative, getOverdueDays } = require('../../utils/format');
+const { formatDate, formatFullDate, formatDateTime, formatRelative, getOverdueDays } = require('../../utils/format');
 
 Page({
   data: {
@@ -118,7 +118,12 @@ Page({
     });
 
     if (res.success) {
-      this.setData({ recentCalls: res.data });
+      // 格式化 startTime（Firestore Timestamp → 显示文本）
+      const recentCalls = res.data.map(call => ({
+        ...call,
+        startTime: formatDateTime(call.startTime),
+      }));
+      this.setData({ recentCalls });
     }
   },
 
