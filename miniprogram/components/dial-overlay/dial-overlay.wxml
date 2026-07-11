@@ -1,0 +1,23 @@
+<!-- components/dial-overlay/dial-overlay.wxml — 拨号覆盖层 -->
+<view class="dial-overlay {{show ? 'active' : ''}}">
+  <!-- 老人头像 -->
+  <view class="dial-avatar {{gender === '女' ? 'female' : 'male'}}">
+    <text>{{surname || '?'}}</text>
+  </view>
+
+  <!-- 老人姓名 -->
+  <view class="dial-name">{{elderlyName || '未知'}}</view>
+
+  <!-- 状态文字 + 动画点 -->
+  <view class="dial-status">
+    <text>正在呼叫</text>
+    <view class="dial-dots">
+      <view class="dot" wx:for="{{dots}}" wx:key="*this"></view>
+    </view>
+  </view>
+
+  <!-- 挂断按钮 -->
+  <view class="dial-hangup" bindtap="onHangup">
+    <text class="hangup-icon">📞</text>
+  </view>
+</view>

@@ -1,0 +1,37 @@
+# ──── OS files ────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ──── IDE / Editor ────
+.idea/
+.vscode/
+*.sublime-*
+
+# ──── WeChat Mini Program ────
+node_modules/
+miniprogram_npm/
+cloudfunctions/*/node_modules/
+cloudfunctions/*/.serverless/
+cloudfunctions/*/.tcb/
+
+# ──── Environment & Secrets ────
+.env
+.env.local
+.env.*.local
+.env.production
+.mini-settings.json
+
+# ──── Private config (personal dev settings) ────
+project.private.config.json
+
+# ──── Logs ────
+*.log
+npm-debug.log*
+
+# ──── Build / Runtime ────
+miniprogram/dist/
+miniprogram/build/
+temp/

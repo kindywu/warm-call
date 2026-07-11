@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>暖心通话 — 志愿者关爱失独老人通话App</title>
+  <style>
+    :root {
+      --bg:      #f5f4ed;
+      --surface: #faf9f5;
+      --fg:      #141413;
+      --muted:   #5e5d59;
+      --border:  #f0eee6;
+      --accent:  #c96442;
+      --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
+      --dark:    #30302e;
+
+      --font-display: Georgia, "Times New Roman", serif;
+      --font-body:    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --font-mono:    ui-monospace, "JetBrains Mono", Menlo, monospace;
+
+      --radius: 10px;
+      --radius-lg: 16px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: #1a1a18;
+      color: var(--fg);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .wrapper {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 64px 32px;
+    }
+
+    .hero { text-align: center; margin-bottom: 72px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 5vw, 56px);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: #faf9f5;
+      margin: 0 0 16px;
+    }
+    .hero p {
+      font-size: 18px;
+      color: #b0aea5;
+      max-width: 40ch;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .screen-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-bottom: 80px;
+    }
+    @media (max-width: 640px) { .screen-grid { grid-template-columns: 1fr; max-width: 400px; margin-inline: auto; } }
+
+    .screen-card {
+      background: #242422;
+      border: 1px solid #3d3d3a;
+      border-radius: 20px;
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      cursor: pointer;
+      display: block;
+    }
+    .screen-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+    .screen-card-thumb {
+      background: var(--bg);
+      aspect-ratio: 390 / 420;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .screen-card-thumb .phone-mini {
+      width: 140px; height: 260px;
+      background: #faf9f5;
+      border-radius: 16px;
+      border: 2px solid #e8e6dc;
+      position: relative;
+      overflow: hidden;
+    }
+    .phone-mini .mini-status {
+      height: 12px; background: transparent;
+    }
+    .phone-mini .mini-header {
+      height: 24px;
+      background: #f5f4ed;
+      border-bottom: 1px solid #e8e6dc;
+      margin-bottom: 4px;
+    }
+    .phone-mini .mini-row {
+      height: 8px; background: #e8e6dc; margin: 8px 10px; border-radius: 4px;
+    }
+    .phone-mini .mini-row.short { width: 60%; }
+    .phone-mini .mini-row.accent { background: var(--accent); opacity: 0.6; width: 40%; }
+    .phone-mini .mini-circle {
+      width: 10px; height: 10px; background: var(--accent);
+      border-radius: 50%; margin: 6px auto 0;
+    }
+    .phone-mini .mini-dots {
+      display: flex; gap: 3px; justify-content: center; margin-top: 4px;
+    }
+    .phone-mini .mini-dots span {
+      width: 4px; height: 4px; background: var(--accent); opacity: 0.5; border-radius: 50%;
+    }
+
+    .screen-card-body {
+      padding: 24px;
+    }
+    .screen-card-body .num {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .screen-card-body h3 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 600;
+      color: #faf9f5;
+      margin: 0 0 6px;
+    }
+    .screen-card-body p {
+      font-size: 14px;
+      color: #b0aea5;
+      margin: 0;
+      line-height: 1.5;
+    }
+    .screen-card-body .arrow {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--accent);
+      transition: gap 0.15s ease;
+    }
+    .screen-card:hover .arrow { gap: 8px; }
+
+    .footer {
+      text-align: center;
+      color: #87867f;
+      font-size: 13px;
+      padding-bottom: 48px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrapper">
+    <header class="hero" data-od-id="hero">
+      <div class="hero-badge">志愿者工具 · 暖心通话</div>
+      <h1>一通电话，<br>就是一份陪伴。</h1>
+      <p>帮助志愿者与失独老人建立温暖连接 —— 登录管理、联系人详情（含历史记录与拨号建议）、紧急来电接听、志愿者个人中心，四个核心功能覆盖每一次关怀。</p>
+    </header>
+
+    <div class="screen-grid">
+      <a class="screen-card" href="screen-login.html" data-od-id="card-login">
+        <div class="screen-card-thumb">
+          <div class="phone-mini">
+            <div class="mini-status"></div>
+            <div style="width:20px;height:20px;border-radius:8px;background:var(--accent);opacity:0.6;margin:14px auto 6px;"></div>
+            <div class="mini-row" style="width:55%;margin:0 auto;"></div>
+            <div class="mini-row short" style="margin:4px auto;"></div>
+            <div class="mini-row" style="margin:12px auto;"></div>
+            <div class="mini-row short" style="margin:4px auto;"></div>
+            <div class="mini-row accent" style="margin-top:10px;"></div>
+          </div>
+        </div>
+        <div class="screen-card-body">
+          <div class="num">界面 00</div>
+          <h3>志愿者登录</h3>
+          <p>手机号码 + 验证码登录，已登录自动跳转至联系人列表。</p>
+          <span class="arrow">打开界面 →</span>
+        </div>
+      </a>
+
+      <a class="screen-card" href="screen-contacts.html" data-od-id="card-contacts">
+        <div class="screen-card-thumb">
+          <div class="phone-mini">
+            <div class="mini-status"></div>
+            <div class="mini-header"></div>
+            <div class="mini-row"></div>
+            <div class="mini-row short"></div>
+            <div class="mini-row"></div>
+            <div class="mini-row short accent"></div>
+            <div class="mini-row"></div>
+            <div class="mini-row short"></div>
+          </div>
+        </div>
+        <div class="screen-card-body">
+          <div class="num">界面 01</div>
+          <h3>老人列表 · 快速拨号</h3>
+          <p>按独居状态、最近通话排序的老人名册，一键拨出，支持搜索筛选。</p>
+          <span class="arrow">打开界面 →</span>
+        </div>
+      </a>
+
+      <a class="screen-card" href="screen-stats.html" data-od-id="card-stats">
+        <div class="screen-card-thumb">
+          <div class="phone-mini">
+            <div class="mini-status"></div>
+            <div class="mini-header"></div>
+            <div class="mini-row accent" style="width:50%;margin:0 auto;"></div>
+            <div style="display:flex;gap:4px;justify-content:center;margin:8px 0;">
+              <div style="flex:1;height:8px;background:var(--accent);opacity:0.6;border-radius:4px;"></div>
+              <div style="flex:1;height:8px;background:#e8e6dc;border-radius:4px;"></div>
+              <div style="flex:1;height:8px;background:#e8e6dc;border-radius:4px;"></div>
+            </div>
+            <div class="mini-row short"></div>
+            <div class="mini-row"></div>
+            <div class="mini-row short"></div>
+            <div class="mini-row" style="width:50%;margin:0 auto;"></div>
+          </div>
+        </div>
+        <div class="screen-card-body">
+          <div class="num">界面 02</div>
+          <h3>服务统计 · 数据仪表板</h3>
+          <p>累计通话、服务时长、覆盖老人、本周趋势与近期动态一览。</p>
+          <span class="arrow">打开界面 →</span>
+        </div>
+      </a>
+
+      <a class="screen-card" href="screen-incoming-call.html" data-od-id="card-incoming">
+        <div class="screen-card-thumb">
+          <div class="phone-mini">
+            <div class="mini-status"></div>
+            <div class="mini-header"></div>
+            <div class="mini-circle"></div>
+            <div class="mini-row short" style="margin: 12px auto 0; width: 40%;"></div>
+            <div class="mini-dots"><span></span><span></span><span></span></div>
+            <div style="display:flex; gap: 6px; justify-content: center; margin-top: 16px;">
+              <div style="width:18px; height:18px; border-radius:50%; background: #17a34a;"></div>
+              <div style="width:18px; height:18px; border-radius:50%; background: var(--accent); opacity: 0.6;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-card-body">
+          <div class="num">界面 03</div>
+          <h3>老人来电 · 紧急提示</h3>
+          <p>老人主动来电时显示紧急程度（紧急 / 普通），基于最近聊天状态智能判断。</p>
+          <span class="arrow">打开界面 →</span>
+        </div>
+      </a>
+
+      <a class="screen-card" href="screen-volunteer.html" data-od-id="card-volunteer">
+        <div class="screen-card-thumb">
+          <div class="phone-mini">
+            <div class="mini-status"></div>
+            <div class="mini-header"></div>
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--accent);opacity:0.5;margin:10px auto 6px;"></div>
+            <div class="mini-row" style="width:45%;margin:0 auto;"></div>
+            <div class="mini-row short" style="margin:4px auto;"></div>
+            <div class="mini-row"></div>
+            <div class="mini-row short"></div>
+            <div class="mini-row"></div>
+            <div class="mini-row short"></div>
+          </div>
+        </div>
+        <div class="screen-card-body">
+          <div class="num">界面 04</div>
+          <h3>志愿者中心 · 个人统计</h3>
+          <p>服务数据总览、今日关怀计划与工具入口。</p>
+          <span class="arrow">打开界面 →</span>
+        </div>
+      </a>
+    </div>
+
+    <footer class="footer" data-od-id="footer">
+      <p>暖心通话 · 志愿者关爱失独老人通话工具 · 原型设计稿</p>
+    </footer>
+  </div>
+</body>
+</html>

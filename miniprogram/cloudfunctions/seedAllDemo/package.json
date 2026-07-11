@@ -1,0 +1,9 @@
+{
+  "name": "seedAllDemo",
+  "version": "1.0.0",
+  "description": "暖心通话 · 全量演示数据灌入（志愿者/通话记录/培训资料/沟通技巧/反馈）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~3.0.0"
+  }
+}

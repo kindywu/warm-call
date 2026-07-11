@@ -1,0 +1,111 @@
+/* components/hobby-chip/hobby-chip.wxss — 爱好 Chip 样式 */
+
+.hobby-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.hobby-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--fg);
+}
+
+.chip-del {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--border-warm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.chip-del:active {
+  background: var(--danger);
+  color: #fff;
+}
+
+.chip-del-text {
+  font-size: 10px;
+  line-height: 1;
+  color: var(--meta);
+}
+
+.hobby-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--accent);
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px dashed var(--border-warm);
+  transition: background 0.15s;
+}
+
+.hobby-add:active {
+  background: var(--bg);
+}
+
+.add-icon {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* 编辑输入区 */
+.hobby-editor {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.hobby-editor-input {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: var(--font-body);
+  background: var(--surface);
+  color: var(--fg);
+  outline: none;
+}
+
+.hobby-editor-input:focus {
+  border-color: var(--accent);
+}
+
+.hobby-editor-btn {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #faf9f5;
+  flex-shrink: 0;
+}
+
+.hobby-editor-btn:active {
+  background: var(--accent-hover);
+}
+
+.hobby-editor-cancel {
+  font-size: 13px;
+  color: var(--meta);
+  padding: 8px 4px;
+  flex-shrink: 0;
+}

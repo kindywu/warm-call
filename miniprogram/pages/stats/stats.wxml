@@ -1,0 +1,113 @@
+<!-- pages/stats/stats.wxml — 服务统计页 -->
+<view class="stats-page">
+  <!-- 头部 -->
+  <view class="header" style="padding-top: {{statusBarHeight + 12}}px;">
+    <view class="header-left">
+      <text class="header-title font-display">服务统计</text>
+    </view>
+    <view class="header-refresh {{refreshing ? 'spinning' : ''}}" bindtap="onRefresh">
+      <text>🔄</text>
+    </view>
+  </view>
+
+  <!-- 视角切换 -->
+  <view class="scope-toggle">
+    <view
+      class="toggle-btn {{scope === 'personal' ? 'active' : ''}}"
+      data-scope="personal"
+      bindtap="onToggleScope"
+    >个人统计</view>
+    <view
+      class="toggle-btn {{scope === 'team' ? 'active' : ''}}"
+      data-scope="team"
+      bindtap="onToggleScope"
+    >团队统计</view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="empty-state" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <block wx:else>
+    <scroll-view class="scroll-area" scroll-y enhanced show-scrollbar="{{false}}">
+      <!-- 累计服务 -->
+      <view class="section">
+        <text class="section-title font-display">累计服务</text>
+        <view class="stats-grid">
+          <view class="stat-card">
+            <text class="stat-val font-display" style="color:var(--accent);">{{totalCalls}}</text>
+            <text class="stat-lbl text-xs text-meta">累计通话/次</text>
+          </view>
+          <view class="stat-card">
+            <text class="stat-val font-display">{{totalDuration}}h</text>
+            <text class="stat-lbl text-xs text-meta">服务时长</text>
+          </view>
+          <view class="stat-card">
+            <text class="stat-val font-display" style="color:var(--blue);">{{totalElderly}}</text>
+            <text class="stat-lbl text-xs text-meta">覆盖老人</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 本周情况 -->
+      <view class="section">
+        <text class="section-title font-display">本周情况</text>
+        <view class="stats-grid">
+          <view class="stat-card">
+            <text class="stat-val font-mono" style="color:var(--accent);">{{weekCalls}}</text>
+            <text class="stat-lbl text-xs text-meta">本周通话/次</text>
+          </view>
+          <view class="stat-card">
+            <text class="stat-val font-mono">{{weekDuration}}h</text>
+            <text class="stat-lbl text-xs text-meta">时长</text>
+          </view>
+          <view class="stat-card">
+            <text class="stat-val font-mono" style="color:var(--blue);">{{weekElderly}}</text>
+            <text class="stat-lbl text-xs text-meta">覆盖</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 今日动态 -->
+      <view class="section">
+        <text class="section-title font-display">今日动态</text>
+        <view class="stats-grid stats-grid-4">
+          <view class="mini-stat">
+            <text class="mini-val" style="color:var(--success);">{{todayCalls}}</text>
+            <text class="mini-lbl text-xs text-meta">已联系</text>
+          </view>
+          <view class="mini-stat">
+            <text class="mini-val">{{todayDuration}}</text>
+            <text class="mini-lbl text-xs text-meta">时长</text>
+          </view>
+          <view class="mini-stat">
+            <text class="mini-val" style="color:var(--danger);">--</text>
+            <text class="mini-lbl text-xs text-meta">需优先关怀</text>
+          </view>
+          <view class="mini-stat">
+            <text class="mini-val" style="color:var(--warn);">{{continuousDays}}</text>
+            <text class="mini-lbl text-xs text-meta">连续服务/天</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 近六月趋势 -->
+      <view class="section">
+        <text class="section-title font-display">近六月通话趋势</text>
+        <view class="chart-area">
+          <view class="chart-bars">
+            <view class="chart-bar-col" wx:for="{{trends}}" wx:key="weekLabel">
+              <view class="chart-bar" style="height: {{item.barHeight}}px;">
+                <text class="bar-value" wx:if="{{item.count > 0}}">{{item.count}}</text>
+              </view>
+              <text class="bar-label text-xs text-meta">{{item.weekLabel}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view style="height:40px;"></view>
+    </scroll-view>
+  </block>
+</view>

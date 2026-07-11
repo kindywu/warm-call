@@ -1,0 +1,36 @@
+<!-- components/hobby-chip/hobby-chip.wxml — 爱好 Chip 列表 -->
+<view class="hobby-chips">
+  <!-- 已有爱好 -->
+  <view class="hobby-chip" wx:for="{{hobbies}}" wx:key="*this">
+    <text>{{item}}</text>
+    <view
+      wx:if="{{editable}}"
+      class="chip-del"
+      data-index="{{index}}"
+      bindtap="onDelete"
+    >
+      <text class="chip-del-text">×</text>
+    </view>
+  </view>
+
+  <!-- 添加按钮（可编辑） -->
+  <view wx:if="{{editable && !showAddInput}}" class="hobby-add" bindtap="onShowAdd">
+    <text class="add-icon">+</text>
+    <text>添加爱好</text>
+  </view>
+
+  <!-- 添加输入框 -->
+  <view wx:if="{{showAddInput}}" class="hobby-editor">
+    <input
+      class="hobby-editor-input"
+      placeholder="输入新爱好"
+      value="{{newHobby}}"
+      bindinput="onInput"
+      bindconfirm="onConfirmAdd"
+      focus="{{true}}"
+      maxlength="20"
+    />
+    <view class="hobby-editor-btn" bindtap="onConfirmAdd">确认</view>
+    <view class="hobby-editor-cancel" bindtap="onCancelAdd">取消</view>
+  </view>
+</view>

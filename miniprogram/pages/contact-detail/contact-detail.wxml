@@ -1,0 +1,120 @@
+<!-- pages/contact-detail/contact-detail.wxml — 老人详情页 -->
+<view class="detail-page">
+  <!-- 顶部导航 -->
+  <view class="top-bar" style="padding-top: {{statusBarHeight + 8}}px;">
+    <view class="back-btn" bindtap="onBack">
+      <text class="back-icon">←</text>
+    </view>
+    <text class="top-bar-title">老人资料</text>
+    <view class="back-btn" bindtap="onLogout">
+      <text class="logout-icon" style="color:var(--danger);">🚪</text>
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="empty-state" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <block wx:elif="{{elderly}}">
+    <!-- 可滚动区域 -->
+    <scroll-view class="scroll-area" scroll-y enhanced show-scrollbar="{{false}}">
+      <!-- 个人资料头部 -->
+      <view class="profile-header">
+        <view class="profile-avatar {{elderly.gender === '女' ? 'female' : 'male'}}">
+          <text>{{elderly.name ? elderly.name[0] : '?'}}</text>
+        </view>
+        <text class="profile-name font-display">{{elderly.name}}</text>
+        <view class="profile-meta">
+          <text>{{elderly.age}}岁</text>
+          <text class="dot">·</text>
+          <text>{{elderly.district}}</text>
+        </view>
+        <view class="status-row">
+          <text
+            wx:if="{{statusBadge}}"
+            class="status-badge status-{{statusBadge.class}}"
+          >{{statusBadge.label}}</text>
+          <text
+            wx:if="{{isPriority}}"
+            class="priority-tag"
+          >需优先关怀</text>
+        </view>
+      </view>
+
+      <!-- 基本信息 -->
+      <view class="section">
+        <text class="section-title font-display">基本信息</text>
+        <view class="info-rows">
+          <view class="info-row" wx:for="{{infoRows}}" wx:key="label">
+            <text class="info-label text-xs text-meta">{{item.label}}</text>
+            <text class="info-value text-sm">{{item.value}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 兴趣爱好 -->
+      <view class="section">
+        <text class="section-title font-display">兴趣爱好</text>
+        <hobby-chip
+          hobbies="{{elderly.hobbies || []}}"
+          editable="{{true}}"
+          bind:change="onHobbiesChange"
+        />
+      </view>
+
+      <!-- 最近通话 -->
+      <view class="section">
+        <view class="section-header">
+          <text class="section-title font-display">最近通话</text>
+          <text class="section-sub text-xs text-meta">最近3条</text>
+        </view>
+        <!-- 通话记录列表 -->
+        <view class="history-card" wx:for="{{recentCalls}}" wx:key="_id">
+          <view class="history-header">
+            <text class="history-date text-sm font-semibold">{{item.startTime}}</text>
+            <text class="history-duration text-xs text-meta">{{item.durationMin}}分钟</text>
+          </view>
+          <text class="history-summary text-sm">{{item.summary || '无摘要'}}</text>
+          <view class="history-tags" wx:if="{{item.tags && item.tags.length}}">
+            <text class="chip chip-neutral" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
+          </view>
+          <view class="history-mood" wx:if="{{item.mood}}">
+            <text class="text-xs text-meta">心情：{{item.mood}}</text>
+          </view>
+        </view>
+        <!-- 空状态 -->
+        <view class="empty-state" wx:if="{{recentCalls.length === 0}}" style="padding:24px;">
+          <text class="text-sm text-meta">暂无通话记录</text>
+        </view>
+      </view>
+
+      <!-- 建议话题 -->
+      <view class="section">
+        <text class="section-title font-display">本次建议话题</text>
+        <view class="suggestion-list">
+          <view class="suggestion-item" wx:for="{{suggestTopics}}" wx:key="*this">
+            <view class="sug-num">{{index + 1}}</view>
+            <text class="sug-text text-sm">{{item}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 底部留白 -->
+      <view style="height:80px;"></view>
+    </scroll-view>
+
+    <!-- 底部通话栏 -->
+    <view class="call-bar safe-area-bottom">
+      <view class="btn-call-main" bindtap="{{elderly.phone ? '' : ''}}">
+        <call-btn
+          elderlyId="{{elderly._id}}"
+          phoneNumber="{{elderly.phone}}"
+          elderlyName="{{elderly.name}}"
+          size="large"
+        />
+        <text class="btn-call-text">立即拨打</text>
+      </view>
+    </view>
+  </block>
+</view>

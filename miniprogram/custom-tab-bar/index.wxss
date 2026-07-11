@@ -1,0 +1,41 @@
+/* custom-tab-bar/index.wxss — 底部导航样式（纯文本） */
+
+.tab-bar {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0;
+  transition: opacity 0.15s;
+}
+
+.tab-item:active {
+  opacity: 0.7;
+}
+
+/* ============================================
+   文字标签
+   ============================================ */
+
+.tab-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--muted);
+  transition: color 0.15s;
+}
+
+/* ============================================
+   Active 状态
+   ============================================ */
+
+.tab-item.active .tab-text {
+  color: var(--accent);
+}

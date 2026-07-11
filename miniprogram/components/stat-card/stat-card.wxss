@@ -1,0 +1,62 @@
+/* components/stat-card/stat-card.wxss — 统计卡片样式 */
+
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.stat-card:active {
+  background: var(--border);
+}
+
+.stat-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+  background: rgba(201, 100, 66, 0.06);
+}
+
+/* 普通尺寸 */
+.stat-card--normal {
+  flex: 1;
+  padding: 14px 10px;
+  text-align: center;
+}
+
+.stat-card--normal .stat-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--fg);
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.stat-card--normal .stat-label {
+  font-size: 11px;
+  color: var(--meta);
+  margin-top: 4px;
+}
+
+/* 迷你尺寸 */
+.stat-card--mini {
+  padding: 10px;
+}
+
+.stat-card--mini .stat-value {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.stat-card--mini .stat-label {
+  font-size: 10px;
+  color: var(--meta);
+  margin-top: 2px;
+}

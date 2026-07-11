@@ -1,0 +1,7 @@
+<!-- components/stat-card/stat-card.wxml — 统计卡片 -->
+<view class="stat-card stat-card--{{type}} {{active ? 'active' : ''}}">
+  <view class="stat-value" style="color: {{active ? 'var(--accent)' : color}};">
+    {{displayValue}}
+  </view>
+  <view class="stat-label">{{label}}</view>
+</view>

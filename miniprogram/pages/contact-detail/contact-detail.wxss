@@ -1,0 +1,308 @@
+/* pages/contact-detail/contact-detail.wxss — 老人详情页样式 */
+
+.detail-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  background: var(--bg);
+}
+
+/* ===== 顶部导航 ===== */
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px 12px;
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+.back-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.back-btn:active {
+  background: var(--border-warm);
+}
+
+.back-icon {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.logout-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.top-bar-title {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--fg);
+  flex: 1;
+}
+
+/* ===== 滚动区 ===== */
+.scroll-area {
+  flex: 1;
+}
+
+/* ===== 个人资料头部 ===== */
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 20px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 500;
+  color: #faf9f5;
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+}
+
+.profile-avatar.female { background: var(--accent); }
+.profile-avatar.male { background: var(--muted); }
+
+.profile-name {
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--fg);
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+
+.profile-meta {
+  font-size: 14px;
+  color: var(--meta);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 3px;
+  height: 3px;
+  background: var(--border-warm);
+  border-radius: 50%;
+}
+
+/* 状态行 */
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.status-badge {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+.status-success { background: var(--success-soft); color: var(--success); }
+.status-done { background: var(--border); color: var(--muted); }
+.status-danger { background: var(--danger-soft); color: var(--danger); }
+
+.priority-tag {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(181, 51, 51, 0.18);
+  color: var(--danger);
+  animation: pulse-priority 2s ease-in-out infinite;
+}
+
+/* ===== 通用区块 ===== */
+.section {
+  padding: 20px;
+}
+
+.section + .section {
+  border-top: 1px solid var(--border);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--fg);
+  letter-spacing: -0.005em;
+  margin-bottom: 12px;
+}
+
+.section-sub {
+  margin-top: -12px;
+}
+
+/* ===== 信息行 ===== */
+.info-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-row:last-child {
+  border-bottom: 0;
+}
+
+.info-label {
+  flex-shrink: 0;
+  width: 70px;
+}
+
+.info-value {
+  flex: 1;
+  text-align: right;
+  color: var(--fg);
+}
+
+/* ===== 通话记录卡片 ===== */
+.history-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+
+.history-card:last-child { margin-bottom: 0; }
+
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.history-date {
+  color: var(--fg);
+}
+
+.history-duration {
+  color: var(--meta);
+}
+
+.history-summary {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.history-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.history-mood {
+  margin-top: 6px;
+}
+
+/* ===== 建议话题 ===== */
+.suggestion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.suggestion-item .sug-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #faf9f5;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.suggestion-item .sug-text {
+  color: var(--fg);
+  line-height: 1.5;
+  flex: 1;
+}
+
+/* ===== 底部通话栏 ===== */
+.call-bar {
+  padding: 12px 20px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.btn-call-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 52px;
+  border-radius: var(--radius);
+  background: var(--accent);
+  animation: pulse-call 2.4s ease-in-out infinite;
+}
+
+.btn-call-main:active {
+  background: var(--accent-hover);
+  transform: scale(0.96);
+}
+
+.btn-call-text {
+  color: #faf9f5;
+  font-size: 16px;
+  font-weight: 500;
+}

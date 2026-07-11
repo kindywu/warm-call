@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>暖心通话 — 老人详情</title>
+  <style>
+    :root {
+      --bg:      #f5f4ed;
+      --surface: #faf9f5;
+      --fg:      #141413;
+      --muted:   #5e5d59;
+      --meta:    #87867f;
+      --border:  #f0eee6;
+      --border-warm: #e8e6dc;
+      --accent:  #c96442;
+      --accent-hover: color-mix(in oklch, var(--accent) 88%, black);
+      --dark:    #30302e;
+      --danger:  #b53333;
+      --success: #17a34a;
+
+      --font-display: Georgia, "Times New Roman", serif;
+      --font-body:    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --font-mono:    ui-monospace, "JetBrains Mono", Menlo, monospace;
+
+      --radius: 10px;
+      --radius-lg: 16px;
+      --radius-sm: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh;
+      background: #1a1a18;
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; cursor: pointer; border: 0; background: none; }
+
+    .phone {
+      width: 390px; height: 844px;
+      background: var(--surface);
+      border-radius: 40px;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      border: 3px solid #3d3d3a;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    /* Status bar */
+    .status-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px 8px;
+      background: var(--surface);
+      font-size: 12px; font-weight: 500;
+      color: var(--fg);
+      flex-shrink: 0;
+    }
+    .status-bar .time { font-weight: 600; }
+
+    /* Top bar */
+    .top-bar {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 20px 12px;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .back-btn {
+      width: 36px; height: 36px;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      background: var(--bg);
+      color: var(--fg);
+      transition: background 0.15s;
+    }
+    .back-btn:hover { background: var(--border-warm); }
+    .back-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+    .top-bar-title {
+      font-size: 17px; font-weight: 600;
+      color: var(--fg);
+    }
+
+    /* Scroll area */
+    .scroll-area {
+      flex: 1; overflow-y: auto;
+      background: var(--surface);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Profile header */
+    .profile-header {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 20px 20px 24px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .profile-avatar {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-family: var(--font-display);
+      font-size: 28px; font-weight: 600;
+      color: #faf9f5;
+      letter-spacing: 0.02em;
+      margin-bottom: 12px;
+    }
+    .profile-avatar.female { background: #c96442; }
+    .profile-avatar.male   { background: #5e5d59; }
+    .profile-name {
+      font-family: var(--font-display);
+      font-size: 24px; font-weight: 600;
+      color: var(--fg);
+      letter-spacing: -0.01em;
+      margin-bottom: 4px;
+    }
+    .profile-meta {
+      font-size: 14px; color: var(--meta);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .profile-meta .dot { width: 3px; height: 3px; background: var(--border-warm); border-radius: 50%; }
+
+    /* Status badge */
+    .status-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 12px;
+    }
+    .status-badge {
+      font-size: 12px; font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .status-badge.recent { background: color-mix(in oklch, var(--success) 12%, transparent); color: var(--success); }
+    .status-badge.overdue { background: color-mix(in oklch, var(--danger) 12%, transparent); color: var(--danger); }
+    .priority-tag {
+      font-size: 11px; font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: color-mix(in oklch, var(--danger) 20%, transparent);
+      color: var(--danger);
+      animation: pulse-priority 2s ease-in-out infinite;
+    }
+    @keyframes pulse-priority {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.65; }
+    }
+
+    /* Section */
+    .section {
+      padding: 20px;
+    }
+    .section + .section { border-top: 1px solid var(--border); }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 16px; font-weight: 600;
+      color: var(--fg);
+      letter-spacing: -0.005em;
+      margin-bottom: 12px;
+    }
+
+    /* Info rows */
+    .info-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .info-row:last-child { border-bottom: 0; }
+    .info-icon {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+    .info-icon svg { width: 18px; height: 18px; stroke: var(--muted); fill: none; stroke-width: 1.5; }
+    .info-label {
+      font-size: 13px; color: var(--meta);
+      margin-bottom: 2px;
+    }
+    .info-value {
+      font-size: 15px; color: var(--fg);
+      font-weight: 500;
+    }
+
+    /* Call history card */
+    .history-card {
+      background: var(--bg);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+    }
+    .history-card + .history-card { margin-top: 10px; }
+    .history-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .history-date {
+      font-size: 14px; font-weight: 600; color: var(--fg);
+    }
+    .history-duration {
+      font-size: 12px; color: var(--meta);
+    }
+    .history-summary {
+      font-size: 14px; color: var(--muted);
+      line-height: 1.5;
+    }
+    .history-tags {
+      display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;
+    }
+    .history-tag {
+      font-size: 11px; font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--border);
+      color: var(--muted);
+    }
+
+    /* Hobby chips */
+    .hobby-chips {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .hobby-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--fg);
+    }
+    .hobby-chip .chip-del {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--border-warm);
+      font-size: 10px; line-height: 1;
+      display: grid; place-items: center;
+      color: var(--meta);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .hobby-chip .chip-del:hover { background: var(--danger); color: #fff; }
+    .hobby-add {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 13px; color: var(--accent);
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px dashed var(--border-warm);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .hobby-add:hover { background: var(--bg); }
+    .hobby-add svg { width: 14px; height: 14px; stroke: var(--accent); fill: none; stroke-width: 2; }
+
+    .hobby-editor {
+      display: flex; gap: 8px; align-items: center; margin-top: 8px;
+    }
+    .hobby-editor input {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      font-size: 14px; font-family: var(--font-body);
+      background: var(--surface);
+      color: var(--fg);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .hobby-editor input:focus { border-color: var(--accent); }
+    .hobby-editor-btn {
+      font-size: 13px; font-weight: 600;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--accent);
+      color: #faf9f5;
+      transition: background 0.15s;
+    }
+    .hobby-editor-btn:hover { background: var(--accent-hover); }
+    .hobby-editor-cancel {
+      font-size: 13px; color: var(--meta);
+      padding: 8px 10px;
+    }
+
+    /* Suggestion list */
+    .suggestion-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 14px;
+      background: var(--bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin-bottom: 8px;
+    }
+    .suggestion-num {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #faf9f5;
+      font-size: 12px; font-weight: 600;
+      display: grid; place-items: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .suggestion-text {
+      font-size: 14px; color: var(--fg);
+      line-height: 1.5;
+    }
+
+    /* Bottom call bar */
+    .call-bar {
+      padding: 12px 20px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex; gap: 12px;
+      align-items: center;
+    }
+    .btn-call {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      height: 52px;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #faf9f5;
+      font-size: 16px; font-weight: 600;
+      transition: background 0.15s, transform 0.1s;
+      animation: pulse-call 2.4s ease-in-out infinite;
+    }
+    .btn-call:hover { background: var(--accent-hover); }
+    .btn-call:active { transform: scale(0.96); }
+    .btn-call svg { width: 20px; height: 20px; stroke: #faf9f5; fill: #faf9f5; stroke-width: 0; }
+
+    @keyframes pulse-call {
+      0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent) 30%, transparent); }
+      50% { box-shadow: 0 0 0 12px color-mix(in oklch, var(--accent) 0%, transparent); }
+    }
+
+    .btn-msg {
+      width: 52px; height: 52px;
+      border-radius: var(--radius);
+      background: var(--bg);
+      display: grid; place-items: center;
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .btn-msg:hover { background: var(--border-warm); }
+    .btn-msg svg { width: 22px; height: 22px; stroke: var(--muted); fill: none; stroke-width: 1.5; }
+
+    /* Dial overlay */
+    .dial-overlay {
+      position: absolute; inset: 0;
+      background: color-mix(in oklch, var(--fg) 85%, transparent);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 24px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+      border-radius: 40px;
+      z-index: 20;
+    }
+    .dial-overlay.active { opacity: 1; pointer-events: auto; }
+    .dial-overlay .dial-avatar {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-family: var(--font-display);
+      font-size: 30px; font-weight: 600;
+      color: #faf9f5;
+    }
+    .dial-overlay .dial-name {
+      font-family: var(--font-display);
+      font-size: 24px; font-weight: 600;
+      color: #faf9f5;
+      letter-spacing: -0.01em;
+      text-align: center;
+    }
+    .dial-overlay .dial-status {
+      font-size: 14px; color: #b0aea5;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .dial-dot-anim { display: flex; gap: 4px; }
+    .dial-dot-anim span {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: #b0aea5;
+      animation: dot-bounce 1.4s ease-in-out infinite;
+    }
+    .dial-dot-anim span:nth-child(2) { animation-delay: 0.2s; }
+    .dial-dot-anim span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dot-bounce {
+      0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
+      40% { opacity: 1; transform: translateY(-4px); }
+    }
+    .dial-hangup {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--danger);
+      display: grid; place-items: center;
+      transition: transform 0.1s ease;
+      cursor: pointer;
+    }
+    .dial-hangup:active { transform: scale(0.9); }
+    .dial-hangup svg { width: 24px; height: 24px; stroke: #faf9f5; fill: none; stroke-width: 2; }
+
+    @media (max-width: 430px) {
+      .phone { width: 100vw; height: 100vh; border-radius: 0; border: 0; }
+      .dial-overlay { border-radius: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="phone" data-od-id="phone-detail">
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <div style="display:flex;gap:6px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><rect x="1" y="6" width="18" height="11" rx="2"/><rect x="20" y="8" width="3" height="7" rx="1" fill="currentColor"/><rect x="2" y="8" width="15" height="7" rx="1"/></svg>
+      <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C17.93 4.07 6.07 4.07 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-6-6l2 2c2.76-2.76 7.24-2.76 10 0l2-2C13.14 7.14 5.86 7.14 3 11z"/></svg>
+    </div>
+  </div>
+
+  <!-- Top bar -->
+  <div class="top-bar" data-od-id="top-bar">
+    <button class="back-btn" onclick="location.href='screen-contacts.html'" aria-label="返回">
+      <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </button>
+    <span class="top-bar-title" style="display:flex;align-items:center;gap:8px;"><span style="background:var(--accent);color:#faf9f5;font-size:11px;font-weight:600;padding:3px 10px;border-radius:999px;line-height:1.3;">志愿者端</span>老人详情</span>
+    <button class="back-btn" style="margin-left:auto;color:var(--danger);" onclick="handleLogout()" aria-label="退出登录">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+    </button>
+  </div>
+
+  <!-- Scrollable content -->
+  <div class="scroll-area" data-od-id="detail-content">
+    <!-- Profile header -->
+    <div class="profile-header" data-od-id="profile-header">
+      <div class="profile-avatar female" id="profAvatar">张</div>
+      <div class="profile-name" id="profName">张书华</div>
+      <div class="profile-meta" id="profMeta">
+        78岁 <span class="dot"></span> 独居·朝阳区
+      </div>
+      <div class="status-row">
+        <span class="status-badge recent" id="statusBadge">3天前联系过</span>
+        <span class="priority-tag" id="priorityTag" style="display:none;">需优先关怀</span>
+      </div>
+    </div>
+
+    <!-- Personal info -->
+    <div class="section" data-od-id="section-info">
+      <div class="section-title">基本信息</div>
+      <div class="info-row">
+        <div class="info-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+        <div>
+          <div class="info-label">出生日期</div>
+          <div class="info-value" id="infoBirthday">1947-03-15</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <div>
+          <div class="info-label">家庭成员</div>
+          <div class="info-value" id="infoFamily">独居</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div>
+          <div class="info-label">居住地址</div>
+          <div class="info-value" id="infoAddress">北京市朝阳区</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div>
+        <div>
+          <div class="info-label">紧急联系人</div>
+          <div class="info-value" id="infoEmergency">社区王主任 — 138****6789</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+        <div>
+          <div class="info-label">兴趣爱好</div>
+          <div class="info-value" id="infoHobby">养花、听京剧、散步</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div>
+          <div class="info-label">健康状况</div>
+          <div class="info-value" id="infoHealth">血压偏高，需注意情绪波动</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hobbies -->
+    <div class="section" data-od-id="section-hobbies">
+      <div class="section-title">兴趣爱好</div>
+      <div class="hobby-chips" id="hobbyChips"></div>
+      <div class="hobby-editor" id="hobbyEditor" style="display:none;">
+        <input type="text" id="hobbyInput" placeholder="输入新的兴趣爱好…" maxlength="12" autocomplete="off" />
+        <button class="hobby-editor-btn" onclick="saveHobby()">添加</button>
+        <button class="hobby-editor-cancel" onclick="cancelHobby()">取消</button>
+      </div>
+    </div>
+
+    <!-- Call history -->
+    <div class="section" data-od-id="section-history">
+      <div class="section-title">最近通话</div>
+      <div class="history-card">
+        <div class="history-card-header">
+          <span class="history-date" id="historyDate">7月7日 14:30</span>
+          <span class="history-duration" id="historyDuration">通话 18 分钟</span>
+        </div>
+        <div class="history-summary" id="historySummary">
+          老人聊到最近养的一盆君子兰开花了，心情很好。提到膝盖最近有点疼，已建议去社区卫生院看看。老人问志愿者下周还来不来电话。
+        </div>
+        <div class="history-tags">
+          <span class="history-tag">情绪良好</span>
+          <span class="history-tag">健康关注</span>
+          <span class="history-tag">约定回访</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Suggestions -->
+    <div class="section" data-od-id="section-suggestions">
+      <div class="section-title">本次建议聊天内容</div>
+      <div class="suggestion-item">
+        <div class="suggestion-num">1</div>
+        <div class="suggestion-text" id="sug1">主动问问老人最近身体怎么样，膝盖还疼不疼，有没有按时吃药。</div>
+      </div>
+      <div class="suggestion-item">
+        <div class="suggestion-num">2</div>
+        <div class="suggestion-text" id="sug2">聊聊君子兰养得怎么样了，北京最近天气热，提醒老人多注意防暑。</div>
+      </div>
+      <div class="suggestion-item">
+        <div class="suggestion-num">3</div>
+        <div class="suggestion-text" id="sug3">问老人最近有没有出门散步，社区有没有什么活动可以参加。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Call bar -->
+  <div class="call-bar" data-od-id="call-bar">
+    <button class="btn-msg" aria-label="发消息">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    </button>
+    <button class="btn-call" onclick="startDial()" data-od-id="btn-call-main">
+      <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+      立即拨打
+    </button>
+  </div>
+
+  <!-- Dial overlay -->
+  <div class="dial-overlay" id="dialOverlay" data-od-id="dial-overlay">
+    <div class="dial-avatar female" id="dialAvatar">张</div>
+    <div class="dial-name" id="dialName">张书华</div>
+    <div class="dial-status">
+      正在呼叫
+      <div class="dial-dot-anim"><span></span><span></span><span></span></div>
+    </div>
+    <button class="dial-hangup" onclick="endDial()" aria-label="挂断">
+      <svg viewBox="0 0 24 24"><path d="M10.68 13.32a16 16 0 003.41 2.51l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07M23 1L1 23"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  function handleLogout() {
+    localStorage.removeItem('volunteerLoggedIn');
+    localStorage.removeItem('volunteerPhone');
+    location.replace('screen-login.html');
+  }
+
+  // ─── Personal info profiles ────────────────────────────────────
+  var profiles = {
+    '孙玉兰':   { birthday: '1944-02-18', family: '独居', address: '北京市通州区梨园镇 8 号院', emergency: '社区钱主任 — 139****4567', hobby: '广场舞、养花、看养生节目', health: '轻度高血压，按时服药控制良好', lastCallDate: '今天 08:45', lastCallDuration: '通话 20 分钟', lastCallSummary: '老人说昨晚睡得不错，早上还去小区跳了半小时广场舞。血压量过正常，药都按时吃。聊到想买一盆茉莉花但不会网购，答应帮她查查。', tags: ['情绪良好','生活积极','需要帮助'], suggestions: ['帮老人查查附近花市或者网购茉莉花的方法，可以下次通话教她。','了解老人最近广场舞的情况，可以夸她坚持锻炼身体好。','关注血压情况，提醒天热注意多喝水、避免中午出门。'] },
+    '周国平':   { birthday: '1948-09-03', family: '独居', address: '北京市昌平区回龙观 5 号院', emergency: '社区孙主任 — 137****8902', hobby: '太极拳、看新闻、下象棋', health: '偶有头晕，颈椎退行性病变', lastCallDate: '今天 09:30', lastCallDuration: '通话 14 分钟', lastCallSummary: '老人最近在学二十四式太极拳，说邻居教了他几招。颈椎还是不太舒服，已经约了下周去社区医院推拿。问志愿者认不认识会下象棋的人。', tags: ['情绪良好','健康关注','社交需求'], suggestions: ['了解老人太极拳学得怎么样，肯定他主动锻炼的态度。','问问颈椎推拿约好时间了没有，提醒按时去，可以做个回访记录。','可以帮老人在社区活动中心打听有没有棋友，下次通话告知。'] },
+    '吴美琴':   { birthday: '1942-06-12', family: '独居', address: '北京市大兴区黄村镇 3 号楼', emergency: '社区周主任 — 135****0123', hobby: '做手工、看电视、信佛', health: '关节炎，天冷时膝盖疼痛加重', lastCallDate: '今天 11:10', lastCallDuration: '通话 25 分钟', lastCallSummary: '老人聊了很多年轻时的事，说以前在服装厂做了三十年。最近膝盖不太疼了因为天气暖和。自己做了一双布鞋送给邻居家小孩。家里小佛像前每天都会上香。', tags: ['情绪良好','有分享欲','生活充实'], suggestions: ['夸老人手巧，可以多聊聊做手工的话题，老人会很高兴。','关心膝盖情况，提醒天热也要注意关节不要着凉。','了解老人信佛多久了，但不要深入讨论宗教话题，尊重就好。'] },
+    '郑德厚':   { birthday: '1950-04-28', family: '独居', address: '北京市顺义区胜利街道 12 号', emergency: '社区吴主任 — 138****3457', hobby: '钓鱼、看球赛、养鸟', health: '前列腺增生，夜尿较多影响睡眠', lastCallDate: '今天 14:00', lastCallDuration: '通话 11 分钟', lastCallSummary: '老人刚午睡起来，说今天天气不错想去河边走走。聊到前几天去钓鱼钓到一条两斤的鲤鱼很开心。最近睡得不太好，夜里要起来好几次。', tags: ['情绪良好','健康关注','户外兴趣'], suggestions: ['聊聊钓鱼的事，老人喜欢这个话题可以让通话变得轻松。','关切睡眠问题，建议白天适当活动、晚上少喝水，必要时建议看泌尿科。','问问养的鸟怎么样了，让他讲讲养鸟的趣事。'] },
+    '黄翠英':   { birthday: '1945-11-07', family: '独居', address: '北京市房山区良乡镇 9 号院', emergency: '社区郑主任 — 136****6781', hobby: '种菜、腌咸菜、和老姐妹唠嗑', health: '高血脂，饮食需控制', lastCallDate: '今天 09:50', lastCallDuration: '通话 16 分钟', lastCallSummary: '老人说阳台上的番茄红了几个特别高兴，打算留一个给志愿者。邻居送了自己腌的黄瓜，说比买的好吃。社区通知下周有免费体检打算去。', tags: ['情绪良好','生活乐趣','健康意识'], suggestions: ['赞美老人阳台种菜，可以请教一下怎么种番茄，让她有成就感。','提醒下周体检的事，问她知道具体时间地点了吗，可以帮忙确认。','问问腌黄瓜的方子，但提醒少吃咸的注意血脂。'] },
+    '林秀珍':   { birthday: '1941-01-25', family: '独居', address: '北京市平谷区滨河街道 2 号楼', emergency: '社区冯主任 — 139****8904', hobby: '听戏、织毛线、看老照片', health: '轻度痴呆早期，记忆力有所下降', lastCallDate: '今天 13:15', lastCallDuration: '通话 22 分钟', lastCallSummary: '老人提到好几次同样的往事，但整体情绪稳定。翻出老照片讲了很多年轻时的事，说到老伴时有点伤感但很快就转移了话题。正在给外甥孙女织一件小毛衣。', tags: ['情绪波动','记忆减退','需耐心'], suggestions: ['耐心听老人重复讲的事情，不要打断或纠正，陪伴本身就是意义。','可以问毛衣织得怎么样了，夸她针线活好，让老人感到被肯定。','注意观察老人近期记忆是否持续变差，如有明显变化需向团队反馈。'] },
+    '张书华': { birthday: '1947-03-15', family: '独居', address: '北京市朝阳区安贞里 12 号楼 3-402', emergency: '社区王主任 — 138****6789', hobby: '养花、听京剧、散步', health: '血压偏高，需注意情绪波动', lastCallDate: '今天 10:20', lastCallDuration: '通话 18 分钟', lastCallSummary: '老人聊到最近养的一盆君子兰开花了，心情很好。提到膝盖最近有点疼，已建议去社区卫生院看看。老人问志愿者下周还来不来电话。', tags: ['情绪良好','健康关注','约定回访'], suggestions: ['主动问问老人最近身体怎么样，膝盖还疼不疼，有没有按时吃药。','聊聊君子兰养得怎么样了，北京最近天气热，提醒老人多注意防暑。','问老人最近有没有出门散步，社区有没有什么活动可以参加。'] },
+    '李国栋':   { birthday: '1943-11-02', family: '独居', address: '北京市海淀区中关村南大街 8 号院', emergency: '社区李主任 — 139****2345', hobby: '下象棋、看新闻、公园遛弯', health: '轻度糖尿病，需注意饮食控制', lastCallDate: '今天 09:15', lastCallDuration: '通话 12 分钟', lastCallSummary: '老人说最近天气太热，白天基本不出门，晚上去公园走走。提到孙子考上大学很高兴。血糖值最近控制得不错。', tags: ['情绪良好','家庭话题'], suggestions: ['恭喜老人孙子考上大学，可以多聊聊这个话题，老人会很开心。','询问最近血糖控制情况，有没有按时测血糖。','关心老人天热注意防暑，问是否需要帮忙买些东西。'] },
+    '王秀英':   { birthday: '1949-08-21', family: '独居', address: '北京市西城区新街口外大街 6 号', emergency: '社区张主任 — 137****8901', hobby: '织毛衣、看电视、养猫', health: '轻度骨质疏松，行动较缓慢', lastCallDate: '7月3日 10:00', lastCallDuration: '通话 15 分钟', lastCallSummary: '老人说她养的花猫最近不吃东西，很担心。提到腿脚不太方便，很久没下楼了。聊到年轻时在纺织厂工作的往事。', tags: ['情绪低落','健康关注','动物陪伴'], suggestions: ['先关心老人的花猫怎么样了，这是她最上心的事，可以建议去社区宠物医院看看。','问问最近有没有出门走走，腿脚不方便可以建议社区志愿者上门看望。','可以聊她年轻时在纺织厂的事，老人很愿意回忆年轻时的事。'] },
+    '赵明德':   { birthday: '1945-05-08', family: '独居', address: '北京市丰台区南三环 16 号院', emergency: '社区刘主任 — 136****5678', hobby: '书法、听评书、看球赛', health: '心脏不太好，有冠状动脉粥样硬化', lastCallDate: '——', lastCallDuration: '——', lastCallSummary: '尚无通话记录。这是首次联系，老人可能对陌生来电有警惕，建议耐心介绍自己和社区关怀项目，先建立信任。', tags: ['首次联系','需耐心'], suggestions: ['先自我介绍身份和社区关怀项目，说明是志愿者定期问候，不是推销。','可以聊老人喜欢的书法 — 这是破冰的好话题，问问最近在写什么。','关心老人生活起居，问平时买菜做饭方便不方便，需要什么帮助。'] },
+    '陈月娥':   { birthday: '1946-12-09', family: '独居', address: '北京市东城区美术馆后街 25 号', emergency: '社区陈主任 — 135****3456', hobby: '剪纸、养鱼、听民歌', health: '睡眠不好，轻度焦虑', lastCallDate: '7月8日 16:00', lastCallDuration: '通话 22 分钟', lastCallSummary: '老人说最近睡眠不太好，经常凌晨三四点就醒了。聊到年轻时在文化馆学剪纸的往事很兴奋，说可以教志愿者。鱼缸里新买了三条金鱼。', tags: ['睡眠问题','有分享欲','生活乐趣'], suggestions: ['关心老人最近的睡眠，建议睡前泡个脚、听点轻音乐。','可以请老人讲讲剪纸的事，她很想分享，这是让她开心的好话题。','问问三条金鱼怎么样了，老人给它们起名字了没有。'] },
+    '刘桂兰':   { birthday: '1951-06-30', family: '独居', address: '北京市石景山区古城路 11 号', emergency: '社区赵主任 — 138****7890', hobby: '唱歌、和老姐妹散步、做面食', health: '整体健康，偶有腰疼', lastCallDate: '昨天 15:45', lastCallDuration: '通话 10 分钟', lastCallSummary: '老人昨天去社区活动中心唱了歌，心情很好。蒸了豆沙包想送给志愿者但不知道怎么寄。腰有点酸，已经贴了膏药。', tags: ['情绪良好','社区活动','有分享欲'], suggestions: ['问问昨天唱歌唱了什么，老人喜欢唱歌可以多陪她聊这个话题。','提醒腰疼要多休息，可以建议一些简单的伸展动作。','如果有条件，问问社区能不能帮忙安排志愿者见面拿豆沙包。'] }
+  };
+  
+  seedAllHobbies();
+
+  function seedAllHobbies() {
+    Object.keys(profiles).forEach(function(name) {
+      var key = 'hobbies_' + name;
+      if (!localStorage.getItem(key)) {
+        localStorage.setItem(key, JSON.stringify(profiles[name].hobby.split('、')));
+      }
+    });
+  }
+
+  function loadDetail() {
+    var raw = localStorage.getItem('contactDetail');
+    if (!raw) { location.href = 'screen-contacts.html'; return; }
+    var d = JSON.parse(raw);
+
+    document.getElementById('profName').textContent     = d.name;
+    document.getElementById('profMeta').innerHTML       = d.age + '岁 <span class="dot"></span> ' + d.location;
+    var avatar = document.getElementById('profAvatar');
+    avatar.textContent = d.name.charAt(0);
+    avatar.className = 'profile-avatar ' + (d.gender === 'female' ? 'female' : 'male');
+
+    var badge = document.getElementById('statusBadge');
+    badge.textContent = d.lastCall;
+    badge.className = 'status-badge ' + (d.status === 'overdue' ? 'overdue' : 'recent');
+
+    var prio = document.getElementById('priorityTag');
+    if (d.priority === '1') { prio.style.display = ''; } else { prio.style.display = 'none'; }
+
+    renderHobbies(d);
+
+    var p = profiles[d.name];
+    document.getElementById('infoBirthday').textContent   = p.birthday;
+    document.getElementById('infoFamily').textContent     = p.family;
+    document.getElementById('infoAddress').textContent    = p.address;
+    document.getElementById('infoEmergency').textContent  = p.emergency;
+    document.getElementById('infoHobby').textContent      = p.hobby;
+    document.getElementById('infoHealth').textContent     = p.health;
+    document.getElementById('historyDate').textContent     = p.lastCallDate;
+    document.getElementById('historyDuration').textContent = p.lastCallDuration;
+    document.getElementById('historySummary').textContent  = p.lastCallSummary;
+
+    var tagsContainer = document.querySelector('.history-tags');
+    tagsContainer.innerHTML = p.tags.map(function(t){ return '<span class="history-tag">'+t+'</span>'; }).join('');
+
+    var sugEls = document.querySelectorAll('.suggestion-text');
+    for (var i = 0; i < sugEls.length; i++) { sugEls[i].textContent = p.suggestions[i] || ''; }
+
+    document.getElementById('profName')._name = d.name;
+    document.getElementById('profName')._gender = d.gender;
+  }
+
+  var _hobbyName = '';
+
+  function hobbyKey(name) { return 'hobbies_' + name; }
+
+  function renderHobbies(d) {
+    _hobbyName = d.name;
+    var key = hobbyKey(d.name);
+    var stored = JSON.parse(localStorage.getItem(key) || 'null');
+    var hobbies = (stored && stored.length > 0) ? stored : (profiles[d.name] ? profiles[d.name].hobby.split('、') : []);
+    var container = document.getElementById('hobbyChips');
+    var html = '';
+    for (var i = 0; i < hobbies.length; i++) {
+      html += '<span class="hobby-chip">' + hobbies[i].trim() + '<button class="chip-del" onclick="removeHobby(\'' + i + '\')">✕</button></span>';
+    }
+    html += '<span class="hobby-add" onclick="showHobbyEditor()" data-od-id="hobby-add-btn">+ 添加爱好</span>';
+    container.innerHTML = html;
+  }
+
+  function showHobbyEditor() {
+    document.getElementById('hobbyEditor').style.display = 'flex';
+    document.getElementById('hobbyInput').value = '';
+    document.getElementById('hobbyInput').focus();
+  }
+
+  function cancelHobby() {
+    document.getElementById('hobbyEditor').style.display = 'none';
+  }
+
+  function saveHobby() {
+    var val = document.getElementById('hobbyInput').value.trim();
+    if (!val) { cancelHobby(); return; }
+    var key = hobbyKey(_hobbyName);
+    var hobbies = JSON.parse(localStorage.getItem(key) || '[]');
+    hobbies.push(val);
+    localStorage.setItem(key, JSON.stringify(hobbies));
+    document.getElementById('hobbyEditor').style.display = 'none';
+    renderHobbies({ name: _hobbyName });
+  }
+
+  function removeHobby(idx) {
+    var key = hobbyKey(_hobbyName);
+    var hobbies = JSON.parse(localStorage.getItem(key) || '[]');
+    hobbies.splice(parseInt(idx), 1);
+    localStorage.setItem(key, JSON.stringify(hobbies));
+    renderHobbies({ name: _hobbyName });
+  }
+
+  // Bind enter key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && document.getElementById('hobbyEditor').style.display === 'flex') {
+      saveHobby();
+    }
+  });
+
+  function startDial() {
+    var name   = document.getElementById('profName')._name;
+    var gender = document.getElementById('profName')._gender;
+    var overlay = document.getElementById('dialOverlay');
+    overlay.classList.add('active');
+    document.getElementById('dialAvatar').textContent = name.charAt(0);
+    document.getElementById('dialAvatar').className = 'dial-avatar ' + (gender === 'female' ? 'female' : 'male');
+    document.getElementById('dialName').textContent = name;
+  }
+  function endDial() {
+    document.getElementById('dialOverlay').classList.remove('active');
+  }
+
+  loadDetail();
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/contacts/contacts",
+    "pages/contact-detail/contact-detail",
+    "pages/stats/stats",
+    "pages/volunteer/volunteer",
+    "pages/training/training",
+    "pages/tips/tips",
+    "pages/feedback/feedback"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#f5f4ed",
+    "navigationBarTitleText": "暖心通话",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f5f4ed"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#5e5d59",
+    "selectedColor": "#c96442",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/contacts/contacts",
+        "text": "联系人"
+      },
+      {
+        "pagePath": "pages/stats/stats",
+        "text": "统计"
+      },
+      {
+        "pagePath": "pages/volunteer/volunteer",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

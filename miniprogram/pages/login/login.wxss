@@ -1,0 +1,132 @@
+/* pages/login/login.wxss — 登录页样式 */
+
+.login-page {
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+/* Hero */
+.login-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 32px 40px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.login-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 0 0 1px var(--accent), 0 4px 24px rgba(0,0,0,0.05);
+}
+
+.login-icon-text {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.login-title {
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--fg);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+.login-subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Body */
+.login-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 24px 48px;
+}
+
+.login-desc {
+  text-align: center;
+  margin-bottom: 24px;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.login-btn {
+  width: 100%;
+  height: 52px;
+  font-size: 17px;
+  margin-bottom: 12px;
+}
+
+.login-btn.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* 错误提示 */
+.login-error {
+  text-align: center;
+  margin-bottom: 16px;
+  padding: 8px;
+  background: var(--danger-soft);
+  border-radius: var(--radius-sm);
+}
+
+/* 协议 */
+.agreement-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+.checkbox-wrap {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-warm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.checkbox-wrap.checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.checkbox-icon {
+  font-size: 11px;
+  color: #fff;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.agreement-text {
+  color: var(--meta);
+}
+
+.agreement-link {
+  color: var(--accent);
+}

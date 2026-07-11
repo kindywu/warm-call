@@ -1,0 +1,69 @@
+<!-- pages/tips/tips.wxml — 沟通技巧页（只读·Q&A折叠） -->
+<view class="tips-page">
+  <!-- 头部 -->
+  <view class="header" style="padding-top: {{statusBarHeight + 12}}px;">
+    <view class="header-back" bindtap="onBack">
+      <text>←</text>
+    </view>
+    <text class="header-title">沟通技巧</text>
+    <view class="header-spacer"></view>
+  </view>
+
+  <!-- 搜索 -->
+  <view class="search-wrap">
+    <view class="search-box">
+      <text class="search-icon">🔍</text>
+      <input
+        class="search-input"
+        placeholder="搜索沟通技巧…"
+        value="{{search}}"
+        bindinput="onSearch"
+      />
+      <view class="search-clear" wx:if="{{search}}" bindtap="onClearSearch">
+        <text>✕</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 卡片列表 -->
+  <scroll-view class="content-area" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="card-list">
+      <view
+        class="qa-card {{item._expanded ? 'expanded' : ''}}"
+        wx:for="{{filtered}}"
+        wx:key="_id"
+        style="animation: fadeIn 0.35s ease both; animation-delay: {{index * 0.05}}s;"
+      >
+        <!-- 问题标题行 -->
+        <view class="qa-header" bindtap="onToggle" data-id="{{item._id}}">
+          <view class="qa-number">
+            <text>{{index + 1}}</text>
+          </view>
+          <view class="qa-body">
+            <text class="qa-question">{{item.title}}</text>
+          </view>
+          <view class="qa-chevron {{item._expanded ? 'open' : ''}}">
+            <text>›</text>
+          </view>
+        </view>
+
+        <!-- 解释区（可折叠） -->
+        <view class="qa-explanation-wrap {{item._expanded ? 'expanded' : ''}}">
+          <view class="qa-explanation-inner">
+            <view class="qa-divider"></view>
+            <text class="qa-answer">{{item.content}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{list.length === 0}}">
+      <view class="empty-icon">💬</view>
+      <text class="empty-title">暂无沟通技巧</text>
+      <text class="empty-desc">后续会陆续添加沟通话术、场景应对等内容，敬请期待</text>
+    </view>
+
+    <view style="height: 48px;"></view>
+  </scroll-view>
+</view>

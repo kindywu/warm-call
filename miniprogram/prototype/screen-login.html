@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>暖心通话 — 志愿者登录</title>
+  <style>
+    :root {
+      --bg:      #f5f4ed;
+      --surface: #faf9f5;
+      --fg:      #141413;
+      --muted:   #5e5d59;
+      --meta:    #87867f;
+      --border:  #f0eee6;
+      --border-warm: #e8e6dc;
+      --accent:  #c96442;
+      --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
+      --accent-hover: color-mix(in oklch, var(--accent) 88%, black);
+      --dark:    #30302e;
+      --danger:  #b53333;
+      --success: #17a34a;
+
+      --font-display: Georgia, "Times New Roman", serif;
+      --font-body:    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --font-mono:    ui-monospace, "JetBrains Mono", Menlo, monospace;
+
+      --radius: 10px;
+      --radius-lg: 16px;
+      --radius-sm: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh;
+      background: #1a1a18;
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; cursor: pointer; border: 0; background: none; }
+    a { color: inherit; text-decoration: none; }
+    input { font: inherit; }
+
+    .phone {
+      width: 390px; height: 844px;
+      background: var(--surface);
+      border-radius: 40px;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      border: 3px solid #3d3d3a;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    .status-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px 8px;
+      background: var(--surface);
+      font-size: 12px; font-weight: 500;
+      color: var(--fg);
+      flex-shrink: 0;
+    }
+    .status-bar .time { font-weight: 600; }
+
+    .scroll-area {
+      flex: 1; overflow-y: auto;
+      background: var(--surface);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Hero area */
+    .login-hero {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 56px 32px 36px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .login-icon {
+      width: 72px; height: 72px;
+      border-radius: 20px;
+      background: var(--accent);
+      display: grid; place-items: center;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 16px rgba(201,100,66,0.3);
+    }
+    .login-icon svg {
+      width: 36px; height: 36px;
+      stroke: #faf9f5; fill: none; stroke-width: 1.8;
+    }
+    .login-hero h1 {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--fg);
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+    }
+    .login-hero .subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+      max-width: 26ch;
+    }
+
+    /* Form */
+    .login-form {
+      padding: 28px 24px 36px;
+      display: flex; flex-direction: column;
+      gap: 16px;
+    }
+
+    .field-group {
+      display: flex; flex-direction: column;
+      gap: 6px;
+    }
+    .field-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .field-input-wrap {
+      display: flex; align-items: center;
+      gap: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0 14px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .field-input-wrap:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(201,100,66,0.12);
+    }
+    .field-input-wrap.error {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(181,51,51,0.10);
+    }
+    .field-input-wrap input {
+      flex: 1;
+      border: 0; background: none;
+      font-size: 17px;
+      color: var(--fg);
+      outline: none;
+      padding: 13px 0;
+      font-family: var(--font-body);
+      letter-spacing: 0.02em;
+    }
+    .field-input-wrap input::placeholder {
+      color: var(--meta);
+      letter-spacing: 0;
+    }
+
+    /* Phone prefix */
+    .phone-prefix {
+      font-size: 17px;
+      color: var(--fg);
+      font-weight: 500;
+      padding-right: 10px;
+      border-right: 1px solid var(--border);
+      margin-right: 2px;
+      flex-shrink: 0;
+    }
+
+    /* Verification code row */
+    .verify-row {
+      display: flex;
+      gap: 10px;
+    }
+    .verify-row .field-input-wrap {
+      flex: 1;
+    }
+    .send-code-btn {
+      flex-shrink: 0;
+      padding: 0 16px;
+      height: 49px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: var(--radius);
+      transition: background 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
+    }
+    .send-code-btn:hover { background: color-mix(in oklch, var(--accent) 22%, transparent); }
+    .send-code-btn:disabled {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+    .send-code-btn.counting {
+      background: var(--border);
+      color: var(--meta);
+    }
+
+    .field-hint {
+      font-size: 12px;
+      color: var(--meta);
+      min-height: 16px;
+    }
+    .field-hint.error-text {
+      color: var(--danger);
+    }
+
+    /* Login button */
+    .login-btn {
+      width: 100%;
+      padding: 15px;
+      background: var(--accent);
+      color: #faf9f5;
+      font-size: 17px; font-weight: 600;
+      border-radius: var(--radius);
+      transition: background 0.15s ease, transform 0.1s ease;
+      letter-spacing: 0.04em;
+      margin-top: 8px;
+    }
+    .login-btn:hover { background: var(--accent-hover); }
+    .login-btn:active { transform: scale(0.97); }
+    .login-btn:disabled {
+      opacity: 0.4; pointer-events: none;
+    }
+
+    /* Agreement */
+    .agreement {
+      text-align: center;
+      font-size: 12px;
+      color: var(--meta);
+      line-height: 1.6;
+      margin-top: 4px;
+    }
+    .agreement a {
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .agreement a:hover { opacity: 0.7; }
+
+    /* Logged-in state */
+    .logged-in-section {
+      padding: 28px 24px 36px;
+      display: flex; flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      text-align: center;
+    }
+    .logged-in-phone {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--fg);
+      letter-spacing: 0.04em;
+    }
+    .logged-in-hint {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 24ch;
+    }
+    .logged-in-actions {
+      display: flex; flex-direction: column;
+      gap: 10px; width: 100%;
+      max-width: 280px;
+    }
+    .btn-enter {
+      width: 100%; padding: 13px;
+      background: var(--accent);
+      color: #faf9f5;
+      font-size: 16px; font-weight: 600;
+      border-radius: var(--radius);
+      transition: background 0.15s ease, transform 0.1s ease;
+      letter-spacing: 0.03em;
+    }
+    .btn-enter:hover { background: var(--accent-hover); }
+    .btn-enter:active { transform: scale(0.97); }
+    .btn-logout-inline {
+      width: 100%; padding: 12px;
+      background: var(--bg);
+      color: var(--danger);
+      font-size: 15px; font-weight: 500;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: background 0.15s ease;
+    }
+    .btn-logout-inline:hover { background: var(--border); }
+
+    @media (max-width: 430px) {
+      .phone { width: 100vw; height: 100vh; border-radius: 0; border: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="phone" data-od-id="phone-login">
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <div style="display:flex;gap:6px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><rect x="1" y="6" width="18" height="11" rx="2"/><rect x="20" y="8" width="3" height="7" rx="1" fill="currentColor"/><rect x="2" y="8" width="15" height="7" rx="1"/></svg>
+      <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C17.93 4.07 6.07 4.07 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-6-6l2 2c2.76-2.76 7.24-2.76 10 0l2-2C13.14 7.14 5.86 7.14 3 11z"/></svg>
+      <svg width="24" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><rect x="1" y="6" width="18" height="11" rx="2"/><rect x="20" y="8" width="3" height="7" rx="1" fill="currentColor"/><rect x="2" y="8" width="15" height="7" rx="1" fill="currentColor" opacity="0.7"/></svg>
+    </div>
+  </div>
+
+  <div class="scroll-area" data-od-id="login-content">
+    <div class="login-hero" data-od-id="login-hero">
+      <div class="login-icon">
+        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <h1>暖心通话</h1>
+      <p class="subtitle">志愿者关爱失独老人通话平台<br>使用手机号码登录</p>
+    </div>
+
+    <div class="login-form" data-od-id="login-form">
+      <div class="field-group">
+        <label class="field-label">手机号码</label>
+        <div class="field-input-wrap" id="phoneWrap">
+          <span class="phone-prefix">+86</span>
+          <input type="tel" id="phoneInput" placeholder="请输入手机号码" maxlength="11" inputmode="numeric" autocomplete="tel" oninput="onPhoneInput()" />
+        </div>
+        <div class="field-hint" id="phoneHint"></div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">验证码</label>
+        <div class="verify-row">
+          <div class="field-input-wrap" id="codeWrap">
+            <input type="text" id="codeInput" placeholder="6 位验证码" maxlength="6" inputmode="numeric" autocomplete="one-time-code" oninput="onCodeInput()" />
+          </div>
+          <button class="send-code-btn" id="sendCodeBtn" onclick="sendVerifyCode()" data-od-id="btn-send-code">发送验证码</button>
+        </div>
+        <div class="field-hint" id="codeHint"></div>
+      </div>
+
+      <button class="login-btn" id="loginBtn" onclick="doLogin()" data-od-id="btn-login">登录</button>
+
+      <p class="agreement">登录即表示同意《<a href="#user-agreement">用户协议</a>》和《<a href="#privacy-policy">隐私政策</a>》</p>
+    </div>
+
+    <div class="logged-in-section" id="loggedInSection" style="display:none;">
+      <p class="logged-in-hint">当前已登录账号</p>
+      <div class="logged-in-phone" id="loggedInPhone"></div>
+      <div class="logged-in-actions">
+        <button class="btn-enter" onclick="location.replace('screen-contacts.html')">进入应用</button>
+        <button class="btn-logout-inline" onclick="handleLogout()">退出登录</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var _isLoggedIn = localStorage.getItem('volunteerLoggedIn') === '1';
+
+  if (_isLoggedIn) {
+    document.querySelector('.login-form').style.display = 'none';
+    document.getElementById('loggedInSection').style.display = 'flex';
+    document.getElementById('loggedInPhone').textContent = localStorage.getItem('volunteerPhone') || '—';
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('volunteerLoggedIn');
+    localStorage.removeItem('volunteerPhone');
+    location.replace('screen-login.html');
+  }
+
+  var phoneValid = false;
+  var codeSent = false;
+  var codeCountdown = 0;
+  var countdownTimer = null;
+
+  var phoneInput = document.getElementById('phoneInput');
+  var codeInput = document.getElementById('codeInput');
+  var phoneWrap = document.getElementById('phoneWrap');
+  var codeWrap = document.getElementById('codeWrap');
+  var phoneHint = document.getElementById('phoneHint');
+  var codeHint = document.getElementById('codeHint');
+  var sendBtn = document.getElementById('sendCodeBtn');
+  var loginBtn = document.getElementById('loginBtn');
+
+  function onPhoneInput() {
+    var raw = phoneInput.value.replace(/\D/g, '');
+    phoneInput.value = raw;
+
+    phoneHint.className = 'field-hint';
+    phoneWrap.classList.remove('error');
+
+    if (raw.length === 0) {
+      phoneHint.textContent = '';
+      phoneValid = false;
+    } else if (!/^1\d{10}$/.test(raw)) {
+      phoneHint.textContent = '请输入正确的 11 位手机号码';
+      phoneHint.className = 'field-hint error-text';
+      phoneWrap.classList.add('error');
+      phoneValid = false;
+    } else {
+      phoneHint.textContent = '';
+      phoneValid = true;
+    }
+
+    updateLoginState();
+  }
+
+  function onCodeInput() {
+    var raw = codeInput.value.replace(/\D/g, '');
+    codeInput.value = raw;
+
+    codeHint.className = 'field-hint';
+    codeWrap.classList.remove('error');
+
+    if (raw.length === 0) {
+      codeHint.textContent = '';
+    } else if (raw.length < 6) {
+      codeHint.textContent = '';
+    }
+
+    updateLoginState();
+
+    if (raw.length === 6 && phoneValid) {
+      doLogin();
+    }
+  }
+
+  function updateLoginState() {
+    var codeVal = codeInput.value.replace(/\D/g, '');
+    var codeOk = codeSent && codeVal.length === 6;
+    loginBtn.disabled = !(phoneValid && codeOk);
+  }
+
+  function sendVerifyCode() {
+    if (!phoneValid) {
+      phoneHint.textContent = '请先输入正确的手机号码';
+      phoneHint.className = 'field-hint error-text';
+      phoneWrap.classList.add('error');
+      phoneInput.focus();
+      return;
+    }
+
+    codeSent = true;
+    startCountdown(60);
+
+    sendBtn.textContent = '60s 后重发';
+    sendBtn.classList.add('counting');
+
+    phoneHint.textContent = '验证码已发送至 ' + phoneInput.value;
+    phoneHint.className = 'field-hint';
+    phoneWrap.classList.remove('error');
+
+    codeInput.focus();
+    updateLoginState();
+  }
+
+  function startCountdown(seconds) {
+    codeCountdown = seconds;
+    clearInterval(countdownTimer);
+    sendBtn.disabled = true;
+
+    countdownTimer = setInterval(function () {
+      codeCountdown--;
+      sendBtn.textContent = codeCountdown + 's 后重发';
+      if (codeCountdown <= 0) {
+        clearInterval(countdownTimer);
+        sendBtn.disabled = false;
+        sendBtn.textContent = '重新发送';
+        sendBtn.classList.remove('counting');
+      }
+    }, 1000);
+  }
+
+  function doLogin() {
+    localStorage.setItem('volunteerLoggedIn', '1');
+    localStorage.setItem('volunteerPhone', phoneInput.value.replace(/\D/g, '') || '138****8888');
+    location.replace('screen-contacts.html');
+  }
+</script>
+</body>
+</html>

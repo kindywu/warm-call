@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "暖心通话",
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "call-btn": "/components/call-btn/call-btn",
+    "stat-card": "/components/stat-card/stat-card",
+    "dial-overlay": "/components/dial-overlay/dial-overlay"
+  }
+}

@@ -1,0 +1,13 @@
+<!-- custom-tab-bar/index.wxml — 底部三 Tab 导航栏（文本） -->
+<view class="tab-bar safe-area-bottom">
+  <view
+    class="tab-item {{selected === index ? 'active' : ''}}"
+    wx:for="{{list}}"
+    wx:key="pagePath"
+    data-index="{{index}}"
+    data-path="{{item.pagePath}}"
+    bindtap="switchTab"
+  >
+    <text class="tab-text">{{item.text}}</text>
+  </view>
+</view>

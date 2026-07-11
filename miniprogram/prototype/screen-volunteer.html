@@ -1,0 +1,1251 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>暖心通话 — 我的</title>
+  <style>
+    :root {
+      --bg:      #f5f4ed;
+      --surface: #faf9f5;
+      --fg:      #141413;
+      --muted:   #5e5d59;
+      --meta:    #87867f;
+      --border:  #f0eee6;
+      --border-warm: #e8e6dc;
+      --accent:  #c96442;
+      --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
+      --dark:    #30302e;
+      --success: #17a34a;
+
+      --font-display: Georgia, "Times New Roman", serif;
+      --font-body:    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --font-mono:    ui-monospace, "JetBrains Mono", Menlo, monospace;
+
+      --radius: 10px;
+      --radius-lg: 16px;
+      --radius-sm: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh;
+      background: #1a1a18;
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; cursor: pointer; border: 0; background: none; }
+
+    .phone {
+      width: 390px; height: 844px;
+      background: var(--surface);
+      border-radius: 40px;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      border: 3px solid #3d3d3a;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    .status-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px 8px;
+      background: var(--surface);
+      font-size: 12px; font-weight: 500;
+      color: var(--fg);
+      flex-shrink: 0;
+    }
+    .status-bar .time { font-weight: 600; }
+    .status-icons { display: flex; align-items: center; gap: 6px; }
+    .status-icons svg { width: 14px; height: 14px; stroke: var(--fg); fill: none; stroke-width: 1.5; }
+
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px 16px;
+      background: var(--surface);
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .header h1 {
+      font-family: var(--font-display);
+      font-size: 28px; font-weight: 600;
+      color: var(--fg);
+      line-height: 1.2; letter-spacing: -0.01em;
+    }
+    .icon-btn {
+      width: 40px; height: 40px;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      background: var(--bg);
+      color: var(--muted);
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .icon-btn:hover { background: var(--border-warm); color: var(--fg); }
+    .icon-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+
+    /* Scroll area */
+    .scroll-area {
+      flex: 1; overflow-y: auto;
+      background: var(--surface);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Profile card */
+    .profile-card {
+      display: flex; align-items: center; gap: 14px;
+      padding: 24px 20px;
+      background: linear-gradient(135deg, var(--bg), var(--surface));
+      border-bottom: 1px solid var(--border);
+    }
+    .volunteer-avatar {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), color-mix(in oklch, var(--accent) 70%, #5e5d59));
+      display: grid; place-items: center;
+      font-family: var(--font-display);
+      font-size: 24px; font-weight: 600;
+      color: #faf9f5;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+    }
+    .volunteer-info { flex: 1; min-width: 0; }
+    .volunteer-name {
+      font-family: var(--font-display);
+      font-size: 20px; font-weight: 600;
+      color: var(--fg);
+      letter-spacing: -0.01em;
+      margin-bottom: 2px;
+    }
+    .volunteer-role {
+      font-size: 13px; color: var(--accent);
+      font-weight: 500;
+    }
+    .volunteer-id {
+      font-size: 12px; color: var(--meta);
+      margin-top: 2px;
+      font-family: var(--font-mono);
+    }
+    .edit-btn {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      display: grid; place-items: center;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      transition: background 0.15s;
+    }
+    .edit-btn:hover { background: var(--border-warm); color: var(--fg); }
+    .edit-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-card {
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 14px 10px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .stat-card .stat-val {
+      font-family: var(--font-display);
+      font-size: 22px; font-weight: 600;
+      color: var(--fg);
+      line-height: 1;
+      letter-spacing: -0.01em;
+    }
+    .stat-card .stat-val.accent { color: var(--accent); }
+    .stat-card .stat-lbl {
+      font-size: 11px; color: var(--meta);
+      margin-top: 4px;
+    }
+
+    /* Section */
+    .section {
+      padding: 20px;
+    }
+    .section + .section { border-top: 1px solid var(--border); }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 16px; font-weight: 600;
+      color: var(--fg);
+      letter-spacing: -0.005em;
+      margin-bottom: 12px;
+    }
+
+    /* Menu list */
+    .menu-list {
+      padding: 0 20px;
+    }
+    .menu-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: opacity 0.1s;
+    }
+    .menu-item:last-child { border-bottom: 0; }
+    .menu-item:active { opacity: 0.6; }
+    .menu-icon {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+    .menu-icon svg { width: 18px; height: 18px; stroke: var(--muted); fill: none; stroke-width: 1.5; }
+    .menu-label { flex: 1; font-size: 15px; color: var(--fg); }
+    .menu-arrow { color: var(--meta); font-size: 13px; }
+    .menu-badge {
+      font-size: 11px; font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+      display: flex; align-items: center;
+      background: var(--dark);
+      padding: 8px 16px;
+      gap: 8px;
+      flex-shrink: 0;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+    }
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 8px 4px;
+      border-radius: var(--radius);
+      color: #87867f;
+      font-size: 11px; font-weight: 500;
+      transition: color 0.15s ease, background 0.15s ease;
+      cursor: pointer;
+      background: none; border: 0;
+    }
+    .nav-item.active { color: var(--accent); }
+    .nav-item:hover { background: rgba(255,255,255,0.06); }
+    .nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+    .nav-item.active svg { fill: var(--accent); stroke: none; }
+
+    .home-indicator {
+      width: 134px; height: 5px;
+      background: #faf9f5;
+      border-radius: 100px;
+      margin: 0 auto;
+    }
+    .home-indicator-wrap {
+      padding: 8px 0;
+      background: var(--dark);
+      flex-shrink: 0;
+    }
+
+    /* Modal */
+    .modal-ovl {
+      position: absolute; inset: 0;
+      background: var(--surface);
+      display: flex; flex-direction: column;
+      z-index: 10;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-ovl.open { opacity: 1; pointer-events: auto; }
+    .modal-hdr {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .modal-back {
+      width: 36px; height: 36px;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      color: var(--muted);
+      transition: background 0.15s;
+    }
+    .modal-back:hover { background: var(--bg); color: var(--fg); }
+    .modal-back svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 20px; font-weight: 600;
+      color: var(--fg);
+      letter-spacing: -0.01em;
+    }
+    .modal-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+    .modal-body .article-title {
+      font-family: var(--font-display);
+      font-size: 17px; font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 8px;
+      letter-spacing: -0.005em;
+    }
+    .modal-body .article-meta {
+      font-size: 12px; color: var(--meta);
+      margin-bottom: 16px;
+    }
+    .modal-body .article-text {
+      font-size: 14px; color: var(--muted);
+      line-height: 1.7;
+    }
+    .modal-body .article-text p { margin-bottom: 10px; }
+    .modal-body .tip-card {
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .modal-body .tip-card:active { background: var(--border-warm); }
+    .modal-body .tip-card .tip-num {
+      font-family: var(--font-display);
+      font-size: 28px; font-weight: 600;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .modal-body .tip-card .tip-title {
+      font-size: 14px; font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 2px;
+    }
+    .modal-body .tip-card .tip-desc {
+      font-size: 13px; color: var(--muted);
+      line-height: 1.6;
+    }
+    .modal-body .tip-card.editing .tip-title,
+    .modal-body .tip-card.editing .tip-desc { display: none; }
+    .modal-body .tip-card .edit-tip-title,
+    .modal-body .tip-card .edit-tip-desc {
+      display: none;
+      width: 100%;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font: inherit; font-size: 14px; font-weight: 600;
+      color: var(--fg);
+      background: var(--surface);
+      outline: none;
+      margin-bottom: 6px;
+    }
+    .modal-body .tip-card.editing .edit-tip-title { display: block; }
+    .modal-body .tip-card .edit-tip-desc {
+      font-size: 13px; font-weight: 400;
+      min-height: 56px; resize: vertical;
+    }
+    .modal-body .tip-card.editing .edit-tip-desc { display: block; }
+    .modal-body .tip-card .edit-actions {
+      display: none; gap: 8px; margin-top: 4px;
+    }
+    .modal-body .tip-card.editing .edit-actions { display: flex; }
+    .modal-body .tip-card .edit-save,
+    .modal-body .tip-card .edit-cancel {
+      padding: 4px 12px; border-radius: 6px;
+      font-size: 12px; font-weight: 500; cursor: pointer;
+      border: 0;
+    }
+    .modal-body .tip-card .edit-save {
+      background: var(--accent); color: var(--surface);
+    }
+    .modal-body .tip-card .edit-cancel {
+      background: var(--bg); color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .modal-body .tip-card .tip-delete {
+      position: absolute; top: 10px; right: 12px;
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 0; background: none;
+      color: var(--meta);
+      font-size: 14px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: color 0.1s, background 0.1s;
+    }
+    .modal-body .tip-card .tip-delete:hover { color: var(--danger); background: var(--bg); }
+
+    /* Tips search + add */
+    .tips-search {
+      position: relative; margin-bottom: 12px;
+    }
+    .tips-search-icon {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      width: 16px; height: 16px; stroke: var(--meta); fill: none; stroke-width: 1.6;
+    }
+    .tips-search-input {
+      width: 100%; padding: 10px 14px 10px 38px;
+      border: 1px solid var(--border-warm);
+      border-radius: var(--radius-sm);
+      font: inherit; font-size: 14px;
+      color: var(--fg);
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .tips-search-input:focus { border-color: var(--accent); }
+    .tips-search-input::placeholder { color: var(--meta); }
+    .tips-count {
+      font-size: 12px; color: var(--meta);
+      margin-bottom: 10px;
+    }
+    .tips-empty {
+      text-align: center; padding: 32px 16px;
+      color: var(--meta); font-size: 14px;
+    }
+    .tips-add-btn {
+      width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 12px;
+      border: 1px dashed var(--border-warm);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--accent);
+      font-size: 14px; font-weight: 500;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: background 0.15s;
+    }
+    .tips-add-btn:hover { background: var(--bg); }
+    .tips-add-btn svg { stroke: currentColor; fill: none; stroke-width: 2; }
+    .tips-add-form {
+      margin-top: 12px;
+      padding: 14px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-warm);
+    }
+    .tips-add-title {
+      width: 100%; padding: 8px 12px;
+      border: 1px solid var(--border-warm);
+      border-radius: 6px;
+      font-size: 14px; font-weight: 600;
+      color: var(--fg);
+      background: var(--surface);
+      outline: none;
+      margin-bottom: 8px;
+    }
+    .tips-add-title:focus { border-color: var(--accent); }
+    .tips-add-desc {
+      width: 100%; min-height: 80px;
+      padding: 8px 12px;
+      border: 1px solid var(--border-warm);
+      border-radius: 6px;
+      font: inherit; font-size: 13px;
+      color: var(--fg);
+      background: var(--surface);
+      resize: vertical;
+      outline: none;
+      margin-bottom: 10px;
+    }
+    .tips-add-desc:focus { border-color: var(--accent); }
+    .tips-add-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .tips-add-cancel {
+      padding: 6px 16px; border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px; cursor: pointer;
+    }
+    .tips-add-save {
+      padding: 6px 16px; border-radius: 6px;
+      border: 0;
+      background: var(--accent);
+      color: var(--surface);
+      font-size: 13px; font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Train search + add */
+    .train-search {
+      position: relative; margin-bottom: 12px;
+    }
+    .train-search-icon {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      width: 16px; height: 16px; stroke: var(--meta); fill: none; stroke-width: 1.6;
+    }
+    .train-search-input {
+      width: 100%; padding: 10px 14px 10px 38px;
+      border: 1px solid var(--border-warm);
+      border-radius: var(--radius-sm);
+      font: inherit; font-size: 14px;
+      color: var(--fg);
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .train-search-input:focus { border-color: var(--accent); }
+    .train-search-input::placeholder { color: var(--meta); }
+    .train-count {
+      font-size: 12px; color: var(--meta);
+      margin-bottom: 10px;
+    }
+    .train-empty {
+      text-align: center; padding: 32px 16px;
+      color: var(--meta); font-size: 14px;
+    }
+    .train-add-btn {
+      width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 12px;
+      border: 1px dashed var(--border-warm);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--accent);
+      font-size: 14px; font-weight: 500;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: background 0.15s;
+    }
+    .train-add-btn:hover { background: var(--bg); }
+    .train-add-btn svg { stroke: currentColor; fill: none; stroke-width: 2; }
+    .train-add-form {
+      margin-top: 12px;
+      padding: 14px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-warm);
+    }
+    .train-add-title {
+      width: 100%; padding: 8px 12px;
+      border: 1px solid var(--border-warm);
+      border-radius: 6px;
+      font-size: 14px; font-weight: 600;
+      color: var(--fg);
+      background: var(--surface);
+      outline: none;
+      margin-bottom: 8px;
+    }
+    .train-add-title:focus { border-color: var(--accent); }
+    .train-add-desc {
+      width: 100%; min-height: 80px;
+      padding: 8px 12px;
+      border: 1px solid var(--border-warm);
+      border-radius: 6px;
+      font: inherit; font-size: 13px;
+      color: var(--fg);
+      background: var(--surface);
+      resize: vertical;
+      outline: none;
+      margin-bottom: 10px;
+    }
+    .train-add-desc:focus { border-color: var(--accent); }
+    .train-add-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .train-add-cancel {
+      padding: 6px 16px; border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px; cursor: pointer;
+    }
+    .train-add-save {
+      padding: 6px 16px; border-radius: 6px;
+      border: 0;
+      background: var(--accent);
+      color: var(--surface);
+      font-size: 13px; font-weight: 600;
+      cursor: pointer;
+    }
+    /* Train card */
+    .card-train {
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .card-train:active { background: var(--border-warm); }
+    .card-train .train-num {
+      font-family: var(--font-display);
+      font-size: 28px; font-weight: 600;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .card-train .train-title {
+      font-size: 14px; font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 2px;
+    }
+    .card-train .train-desc {
+      font-size: 13px; color: var(--muted);
+      line-height: 1.6;
+    }
+    .card-train.editing .train-title,
+    .card-train.editing .train-desc { display: none; }
+    .card-train .edit-train-title,
+    .card-train .edit-train-desc {
+      display: none;
+      width: 100%;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font: inherit; font-size: 14px; font-weight: 600;
+      color: var(--fg);
+      background: var(--surface);
+      outline: none;
+      margin-bottom: 6px;
+    }
+    .card-train.editing .edit-train-title { display: block; }
+    .card-train .edit-train-desc {
+      font-size: 13px; font-weight: 400;
+      min-height: 56px; resize: vertical;
+    }
+    .card-train.editing .edit-train-desc { display: block; }
+    .card-train .edit-actions {
+      display: none; gap: 8px; margin-top: 4px;
+    }
+    .card-train.editing .edit-actions { display: flex; }
+    .card-train .edit-save,
+    .card-train .edit-cancel {
+      padding: 4px 12px; border-radius: 6px;
+      font-size: 12px; font-weight: 500; cursor: pointer;
+      border: 0;
+    }
+    .card-train .edit-save {
+      background: var(--accent); color: var(--surface);
+    }
+    .card-train .edit-cancel {
+      background: var(--bg); color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .card-train .train-delete {
+      position: absolute; top: 10px; right: 12px;
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 0; background: none;
+      color: var(--meta);
+      font-size: 14px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: color 0.1s, background 0.1s;
+    }
+    .card-train .train-delete:hover { color: var(--danger); background: var(--bg); }
+
+    /* Online search results */
+    .online-search-section {
+      border-top: 1px solid var(--border-warm);
+      padding-top: 16px;
+      margin-top: 20px;
+    }
+    .online-search-section .section-label {
+      font-size: 13px; color: var(--meta);
+      margin-bottom: 10px;
+    }
+    .online-search-info {
+      font-size: 12px; color: var(--meta);
+      margin-top: 6px; text-align: center;
+    }
+    .online-result {
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+    }
+    .online-result .result-title {
+      font-size: 14px; font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 4px;
+    }
+    .online-result .result-src {
+      font-size: 12px; color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .online-result .result-desc {
+      font-size: 12px; color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    .online-result .btn-add-train {
+      padding: 6px 14px; border-radius: 6px;
+      border: 1px solid var(--accent);
+      background: var(--surface);
+      color: var(--accent);
+      font-size: 12px; font-weight: 600;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .online-result .btn-add-train:active {
+      background: var(--accent);
+      color: var(--surface);
+    }
+    .online-result .btn-add-train.added {
+      background: var(--border-warm);
+      color: var(--meta);
+      border-color: var(--border-warm);
+      cursor: default;
+    }
+
+    .modal-body textarea {
+      width: 100%; min-height: 120px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font: inherit; font-size: 14px;
+      color: var(--fg);
+      background: var(--bg);
+      resize: vertical;
+      margin-bottom: 12px;
+    }
+    .modal-body textarea:focus { outline: none; border-color: var(--accent); }
+    .submit-btn {
+      width: 100%; padding: 12px;
+      background: var(--accent);
+      color: var(--surface);
+      border: 0; border-radius: var(--radius-sm);
+      font-size: 14px; font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .submit-btn:active { background: color-mix(in oklch, var(--accent) 85%, black); }
+    .toast {
+      position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+      background: var(--fg); color: var(--surface);
+      padding: 10px 20px; border-radius: 999px;
+      font-size: 13px; font-weight: 500;
+      opacity: 0; transition: opacity 0.3s ease;
+      z-index: 20; pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; pointer-events: none; }
+
+    @media (max-width: 430px) {
+      .phone { width: 100vw; height: 100vh; border-radius: 0; border: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="phone" data-od-id="phone-volunteer">
+    <!-- Status bar -->
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="status-icons">
+        <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C17.93 4.07 6.07 4.07 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-6-6l2 2c2.76-2.76 7.24-2.76 10 0l2-2C13.14 7.14 5.86 7.14 3 11z"/></svg>
+        <svg viewBox="0 0 24 24" style="width:24px;"><rect x="1" y="6" width="18" height="11" rx="2" stroke="currentColor" fill="none"/><rect x="20" y="8" width="3" height="7" rx="1" fill="currentColor"/><rect x="2" y="8" width="15" height="7" rx="1"/></svg>
+      </div>
+    </div>
+
+    <!-- App header -->
+    <header class="header" data-od-id="header">
+      <div>
+        <h1>我的 <span style="background:var(--accent);color:#faf9f5;font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;line-height:1.3;vertical-align:middle;margin-left:4px;">志愿者端</span></h1>
+        <div style="font-size:12px;color:var(--meta);margin-top:2px;font-weight:400;">志愿者 · 陈志远</div>
+      </div>
+      <button class="icon-btn" aria-label="设置">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </button>
+    </header>
+
+    <div class="scroll-area" data-od-id="volunteer-content">
+      <!-- Volunteer profile card -->
+      <div class="profile-card" data-od-id="volunteer-profile">
+        <div class="volunteer-avatar">陈</div>
+        <div class="volunteer-info">
+          <div class="volunteer-name">陈志远</div>
+          <div class="volunteer-role">星级志愿者 · 累计服务 2 年</div>
+          <div class="volunteer-id">志愿者编号 VF-2024-0382</div>
+        </div>
+        <button class="edit-btn" aria-label="编辑资料">
+          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </div>
+
+      <!-- Menu -->
+      <div class="section" data-od-id="section-menu">
+        <div class="section-title">设置与工具</div>
+        <div class="menu-list">
+          <div class="menu-item" onclick="openModal('modal-training')" tabindex="0" role="button" aria-label="培训资料">
+            <div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <span class="menu-label">培训资料</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item" onclick="openModal('modal-tips')" tabindex="0" role="button" aria-label="沟通技巧">
+            <div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+            <span class="menu-label">沟通技巧</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item" onclick="openModal('modal-help')" tabindex="0" role="button" aria-label="反馈平台">
+            <div class="menu-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></div>
+            <span class="menu-label">反馈平台</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item" onclick="handleLogout()" tabindex="0" role="button" aria-label="退出登录" style="border-top:1px solid var(--border);margin-top:4px;padding-top:16px;">
+            <div class="menu-icon" style="color:var(--danger);"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg></div>
+            <span class="menu-label" style="color:var(--danger);">退出登录</span>
+            <span class="menu-arrow">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom navigation -->
+    <nav class="bottom-nav" data-od-id="bottom-nav">
+      <button class="nav-item" onclick="location.href='screen-contacts.html'">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        联系人
+      </button>
+      <button class="nav-item" onclick="location.href='screen-stats.html'">
+        <svg viewBox="0 0 24 24"><rect x="4" y="14" width="4" height="7" rx="1"/><rect x="10" y="9" width="4" height="12" rx="1"/><rect x="16" y="4" width="4" height="17" rx="1"/></svg>
+        统计
+      </button>
+      <button class="nav-item active">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        我的
+      </button>
+    </nav>
+
+    <div class="home-indicator-wrap">
+      <div class="home-indicator"></div>
+    </div>
+
+    <!-- Modal: 培训资料 -->
+    <div class="modal-ovl" data-od-id="modal-training" id="modal-training">
+      <div class="modal-hdr">
+        <button class="modal-back" onclick="closeModal()" aria-label="返回">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <span class="modal-title">培训资料</span>
+      </div>
+      <div class="modal-body" id="train-body">
+        <div class="train-search">
+          <svg class="train-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input class="train-search-input" id="train-search" type="text" placeholder="搜索本地资料…" oninput="filterTrains()" autocomplete="off" />
+        </div>
+        <div class="train-count" id="train-count"></div>
+        <div id="train-list"></div>
+        <button class="train-add-btn" onclick="showAddTrainForm()">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M12 5v14M5 12h14"/></svg>
+          新增培训资料
+        </button>
+        <div class="train-add-form" id="train-add-form" style="display:none;">
+          <input class="train-add-title" id="train-add-title" type="text" placeholder="资料标题" maxlength="60" />
+          <textarea class="train-add-desc" id="train-add-desc" placeholder="资料内容/链接…" maxlength="500"></textarea>
+          <div class="train-add-actions">
+            <button class="train-add-cancel" onclick="cancelAddTrain()">取消</button>
+            <button class="train-add-save" onclick="saveNewTrain()">保存</button>
+          </div>
+        </div>
+        <div class="online-search-section">
+          <div class="section-label">联网搜索更多培训资料</div>
+          <div style="display:flex;gap:8px;">
+            <input class="online-search-input" id="online-search-input" type="text" placeholder="输入关键词在线搜索…" style="flex:1;padding:9px 12px;border:1px solid var(--border-warm);border-radius:var(--radius-sm);font:inherit;font-size:13px;color:var(--fg);background:var(--surface);outline:none;" onkeydown="if(event.key==='Enter')searchOnline()" />
+            <button class="online-search-btn" onclick="searchOnline()" style="padding:9px 16px;border:0;border-radius:var(--radius-sm);background:var(--accent);color:var(--surface);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">搜索</button>
+          </div>
+          <div class="online-search-info" id="online-search-info"></div>
+          <div id="online-results"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: 沟通技巧 -->
+    <div class="modal-ovl" data-od-id="modal-tips" id="modal-tips">
+      <div class="modal-hdr">
+        <button class="modal-back" onclick="closeModal()" aria-label="返回">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <span class="modal-title">沟通技巧</span>
+      </div>
+      <div class="modal-body" id="tips-body">
+        <div class="tips-search">
+          <svg class="tips-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input class="tips-search-input" id="tips-search" type="text" placeholder="搜索沟通技巧…" oninput="filterTips()" autocomplete="off" />
+        </div>
+        <div class="tips-count" id="tips-count"></div>
+        <div id="tips-list"></div>
+        <button class="tips-add-btn" onclick="showAddTipForm()">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M12 5v14M5 12h14"/></svg>
+          新增技巧
+        </button>
+        <div class="tips-add-form" id="tips-add-form" style="display:none;">
+          <input class="tips-add-title" id="tips-add-title" type="text" placeholder="技巧标题" maxlength="40" />
+          <textarea class="tips-add-desc" id="tips-add-desc" placeholder="技巧内容描述…" maxlength="200"></textarea>
+          <div class="tips-add-actions">
+            <button class="tips-add-cancel" onclick="cancelAddTip()">取消</button>
+            <button class="tips-add-save" onclick="saveNewTip()">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: 反馈平台 -->
+    <div class="modal-ovl" data-od-id="modal-help" id="modal-help">
+      <div class="modal-hdr">
+        <button class="modal-back" onclick="closeModal()" aria-label="返回">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <span class="modal-title">反馈平台</span>
+      </div>
+      <div class="modal-body">
+        <div class="article-title">联系我们</div>
+        <div class="article-text" style="margin-bottom:20px;">
+          <p>如有使用问题或建议，请通过以下方式联系团队：</p>
+          <p>📞 服务热线：400-8820-110</p>
+          <p>📧 邮箱：volunteer@warmcall.cn</p>
+        </div>
+        <div class="article-title" style="margin-bottom:8px;">快速反馈</div>
+        <textarea placeholder="请描述您遇到的问题或建议..."></textarea>
+        <button class="submit-btn" onclick="submitFeedback()">提交反馈</button>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" data-od-id="toast" id="toast">已收到反馈，谢谢！</div>
+  </div>
+
+  <script>
+    var tipsKey = 'warmcall_tips';
+    var defaultTips = [
+      {title:'从天气话题展开', desc:'陈奶奶喜欢聊现在的菜价变化，春天可以问种花，冬天聊暖气。从身边事切入最自然。'},
+      {title:'分享而非采访', desc:'可以说"我今天路过菜市场看到冬瓜特别新鲜"而不是"你今天吃了什么"。分享自己的生活让对方更愿意回应。'},
+      {title:'肯定对方的贡献', desc:'"您上次说的那个小偏方我用了真的有效"——让对方感到自己被需要，这是最有力的陪伴方式。'},
+      {title:'留意情绪信号', desc:'如果老人反复提到"活着没意思""不想麻烦别人"，请向团队及时反馈并记录。'}
+    ];
+    var tips = [];
+
+    function loadTips() {
+      var raw = localStorage.getItem(tipsKey);
+      if (raw) {
+        try { tips = JSON.parse(raw); } catch(e) { tips = defaultTips.slice(); }
+      } else {
+        tips = defaultTips.slice();
+      }
+      if (!tips.length) tips = defaultTips.slice();
+    }
+
+    function saveTips() {
+      localStorage.setItem(tipsKey, JSON.stringify(tips));
+    }
+
+    function renderTips(filter) {
+      filter = (filter || '').trim().toLowerCase();
+      var list = document.getElementById('tips-list');
+      var count = document.getElementById('tips-count');
+      var filtered = filter ? tips.filter(function(t) {
+        return t.title.toLowerCase().indexOf(filter) !== -1 || t.desc.toLowerCase().indexOf(filter) !== -1;
+      }) : tips.slice();
+      count.textContent = '共 ' + filtered.length + ' 条技巧' + (filter ? '（搜索"' + filter + '"）' : '');
+
+      if (!filtered.length) {
+        list.innerHTML = '<div class="tips-empty">暂无匹配的沟通技巧<br><span style="font-size:12px;color:var(--meta);">试试其他关键词，或新增一条</span></div>';
+        return;
+      }
+      var h = '';
+      for (var i = 0; i < filtered.length; i++) {
+        var t = filtered[i];
+        var idx = tips.indexOf(t);
+        h += '<div class="tip-card" data-od-id="tip-card-' + idx + '" title="点击编辑">' +
+          '<button class="tip-delete" onclick="event.stopPropagation();deleteTip(' + idx + ')" aria-label="删除" title="删除">&times;</button>' +
+          '<div class="tip-num">' + pad(idx + 1) + '</div>' +
+          '<div class="tip-title">' + esc(t.title) + '</div>' +
+          '<div class="tip-desc">' + esc(t.desc) + '</div>' +
+          '<input class="edit-tip-title" id="edit-title-' + idx + '" value="' + escAttr(t.title) + '" />' +
+          '<textarea class="edit-tip-desc" id="edit-desc-' + idx + '">' + esc(t.desc) + '</textarea>' +
+          '<div class="edit-actions">' +
+            '<button class="edit-save" onclick="event.stopPropagation();saveTipEdit(' + idx + ')">保存</button>' +
+            '<button class="edit-cancel" onclick="event.stopPropagation();cancelTipEdit(' + idx + ')">取消</button>' +
+          '</div>' +
+        '</div>';
+      }
+      list.innerHTML = h;
+
+      for (var j = 0; j < filtered.length; j++) {
+        (function(card, ti, idx) {
+          card.addEventListener('click', function(e) {
+            if (e.target.closest('.tip-delete, .edit-actions, .edit-tip-title, .edit-tip-desc')) return;
+            enterEdit(idx);
+          });
+        })(list.children[j], filtered[j], tips.indexOf(filtered[j]));
+      }
+    }
+
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    function esc(s) { s = '' + s; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function escAttr(s) { s = '' + s; return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function enterEdit(idx) {
+      var card = document.getElementById('tips-list').children;
+      for (var i = 0; i < card.length; i++) card[i].classList.remove('editing');
+      var target = document.querySelector('[data-od-id="tip-card-' + idx + '"]');
+      if (target) target.classList.add('editing');
+    }
+
+    function saveTipEdit(idx) {
+      var title = document.getElementById('edit-title-' + idx);
+      var desc = document.getElementById('edit-desc-' + idx);
+      if (!title || !desc) return;
+      var newTitle = title.value.trim();
+      var newDesc = desc.value.trim();
+      if (!newTitle) return;
+      tips[idx].title = newTitle;
+      tips[idx].desc = newDesc;
+      saveTips();
+      filterTips();
+    }
+
+    function cancelTipEdit(idx) {
+      var target = document.querySelector('[data-od-id="tip-card-' + idx + '"]');
+      if (target) target.classList.remove('editing');
+    }
+
+    function deleteTip(idx) {
+      if (!confirm('确定删除"' + tips[idx].title + '"？')) return;
+      tips.splice(idx, 1);
+      saveTips();
+      filterTips();
+    }
+
+    function showAddTipForm() {
+      document.getElementById('tips-add-form').style.display = 'block';
+      document.getElementById('tips-add-title').focus();
+    }
+
+    function cancelAddTip() {
+      document.getElementById('tips-add-form').style.display = 'none';
+      document.getElementById('tips-add-title').value = '';
+      document.getElementById('tips-add-desc').value = '';
+    }
+
+    function saveNewTip() {
+      var title = document.getElementById('tips-add-title').value.trim();
+      var desc = document.getElementById('tips-add-desc').value.trim();
+      if (!title) { alert('请输入技巧标题'); return; }
+      if (!desc) { alert('请输入技巧内容'); return; }
+      tips.unshift({title: title, desc: desc});
+      saveTips();
+      cancelAddTip();
+      filterTips();
+    }
+
+    function filterTips() {
+      var q = document.getElementById('tips-search').value;
+      renderTips(q);
+    }
+
+    /* ---------- 培训资料 ---------- */
+    var trainKey = 'warmcall_trains';
+    var defaultTrains = [
+      {title:'老年人沟通基础', desc:'老年群体可能因孤独感而产生表达欲望增强。耐心倾听是第一要务。\n\n语速中等，吐字清晰；避免使用网络流行语或缩写；主动询问"今天身体怎么样"打破沉默；不打断对方回忆往事，给予积极反馈。'},
+      {title:'失独家庭服务指南', desc:'失独家庭与非失独家庭不同——他们经历过重大的丧失。不要在通话中询问子女情况或节日安排。\n\n了解基本家庭背景——知道老人的情况但不主动提及；关注老人的心理状态——注意情绪低落或异常动向；遇到紧急情况立即通过 App 上报。'},
+      {title:'紧急情况处理流程', desc:'当老人表现出自伤倾向或说出"不想活了"等信号时：\n\n1. 保持通话不要挂断，语气平稳\n2. 尝试获取老人当前位置\n3. 用另一个手机立即联系社区/110\n4. 通话后填写应急处置报告'}
+    ];
+    var trains = [];
+
+    function loadTrains() {
+      var raw = localStorage.getItem(trainKey);
+      if (raw) {
+        try { trains = JSON.parse(raw); } catch(e) { trains = defaultTrains.slice(); }
+      } else {
+        trains = defaultTrains.slice();
+      }
+      if (!trains.length) trains = defaultTrains.slice();
+    }
+
+    function saveTrains() {
+      localStorage.setItem(trainKey, JSON.stringify(trains));
+    }
+
+    function renderTrains(filter) {
+      filter = (filter || '').trim().toLowerCase();
+      var list = document.getElementById('train-list');
+      var count = document.getElementById('train-count');
+      var filtered = filter ? trains.filter(function(t) {
+        return t.title.toLowerCase().indexOf(filter) !== -1 || t.desc.toLowerCase().indexOf(filter) !== -1;
+      }) : trains.slice();
+      count.textContent = '共 ' + filtered.length + ' 份资料' + (filter ? '（搜索"' + filter + '"）' : '');
+
+      if (!filtered.length) {
+        list.innerHTML = '<div class="train-empty">暂无匹配的培训资料<br><span style="font-size:12px;color:var(--meta);">试试其他关键词，或新增一份</span></div>';
+        return;
+      }
+      var h = '';
+      for (var i = 0; i < filtered.length; i++) {
+        var t = filtered[i];
+        var idx = trains.indexOf(t);
+        h += '<div class="card-train" data-od-id="train-card-' + idx + '" title="点击编辑">' +
+          '<button class="train-delete" onclick="event.stopPropagation();deleteTrain(' + idx + ')" aria-label="删除" title="删除">&times;</button>' +
+          '<div class="train-num">' + pad(idx + 1) + '</div>' +
+          '<div class="train-title">' + esc(t.title) + '</div>' +
+          '<div class="train-desc">' + esc(t.desc) + '</div>' +
+          '<input class="edit-train-title" id="edit-train-title-' + idx + '" value="' + escAttr(t.title) + '" />' +
+          '<textarea class="edit-train-desc" id="edit-train-desc-' + idx + '">' + esc(t.desc) + '</textarea>' +
+          '<div class="edit-actions">' +
+            '<button class="edit-save" onclick="event.stopPropagation();saveTrainEdit(' + idx + ')">保存</button>' +
+            '<button class="edit-cancel" onclick="event.stopPropagation();cancelTrainEdit(' + idx + ')">取消</button>' +
+          '</div>' +
+        '</div>';
+      }
+      list.innerHTML = h;
+
+      for (var j = 0; j < filtered.length; j++) {
+        (function(card, ti, idx) {
+          card.addEventListener('click', function(e) {
+            if (e.target.closest('.train-delete, .edit-actions, .edit-train-title, .edit-train-desc')) return;
+            enterTrainEdit(idx);
+          });
+        })(list.children[j], filtered[j], trains.indexOf(filtered[j]));
+      }
+    }
+
+    function enterTrainEdit(idx) {
+      var cards = document.getElementById('train-list').children;
+      for (var i = 0; i < cards.length; i++) cards[i].classList.remove('editing');
+      var target = document.querySelector('[data-od-id="train-card-' + idx + '"]');
+      if (target) target.classList.add('editing');
+    }
+
+    function saveTrainEdit(idx) {
+      var title = document.getElementById('edit-train-title-' + idx);
+      var desc = document.getElementById('edit-train-desc-' + idx);
+      if (!title || !desc) return;
+      var newTitle = title.value.trim();
+      var newDesc = desc.value.trim();
+      if (!newTitle) return;
+      trains[idx].title = newTitle;
+      trains[idx].desc = newDesc;
+      saveTrains();
+      filterTrains();
+    }
+
+    function cancelTrainEdit(idx) {
+      var target = document.querySelector('[data-od-id="train-card-' + idx + '"]');
+      if (target) target.classList.remove('editing');
+    }
+
+    function deleteTrain(idx) {
+      if (!confirm('确定删除"' + trains[idx].title + '"？')) return;
+      trains.splice(idx, 1);
+      saveTrains();
+      filterTrains();
+    }
+
+    function showAddTrainForm() {
+      document.getElementById('train-add-form').style.display = 'block';
+      document.getElementById('train-add-title').focus();
+    }
+
+    function cancelAddTrain() {
+      document.getElementById('train-add-form').style.display = 'none';
+      document.getElementById('train-add-title').value = '';
+      document.getElementById('train-add-desc').value = '';
+    }
+
+    function saveNewTrain() {
+      var title = document.getElementById('train-add-title').value.trim();
+      var desc = document.getElementById('train-add-desc').value.trim();
+      if (!title) { alert('请输入资料标题'); return; }
+      if (!desc) { alert('请输入资料内容'); return; }
+      trains.unshift({title: title, desc: desc});
+      saveTrains();
+      cancelAddTrain();
+      filterTrains();
+    }
+
+    function filterTrains() {
+      var q = document.getElementById('train-search').value;
+      renderTrains(q);
+    }
+
+    function searchOnline() {
+      var q = document.getElementById('online-search-input').value.trim();
+      if (!q) { alert('请输入搜索关键词'); return; }
+      var results = getOnlineResults(q);
+      var container = document.getElementById('online-results');
+      var info = document.getElementById('online-search-info');
+      info.textContent = '关于"' + q + '"找到 ' + results.length + ' 条相关培训资料';
+      if (!results.length) {
+        info.textContent = '关于"' + q + '"未找到相关培训资料，试试其他关键词';
+        container.innerHTML = '';
+        return;
+      }
+      var h = '';
+      for (var i = 0; i < results.length; i++) {
+        var r = results[i];
+        h += '<div class="online-result" data-od-id="online-result-' + i + '">' +
+          '<div class="result-title">' + esc(r.title) + '</div>' +
+          '<div class="result-src">来源：' + esc(r.src) + '</div>' +
+          '<div class="result-desc">' + esc(r.desc) + '</div>' +
+          '<button class="btn-add-train" onclick="addFromOnline(' + i + ', this)">+ 添加到资料库</button>' +
+        '</div>';
+      }
+      container.innerHTML = h;
+      window._onlineResults = results;
+    }
+
+    var onlineDB = [
+      { title: '如何与孤独老人建立信任关系', src: '中国志愿服务网', desc: '孤独老人往往对陌生人怀有戒心。建议前三次通话以"服务告知"为目标，不要急于深入话题。从关注生活细节入手，如天气提醒、节日问候等，逐步建立安全感。', keywords: '孤独 信任 建立关系' },
+      { title: '失独家庭心理特征与沟通要点', src: '心理援助热线', desc: '失独家庭核心心理需求是"被看见"而非"被同情"。志愿者应避免使用"我理解你的感受"等空洞安慰，改用"您今天愿意和我聊聊什么？"等开放式邀请。', keywords: '心理 失独 沟通' },
+      { title: '老年人常见健康问题预警信号', src: '健康中国', desc: '通话中留意老人是否出现：突然说话含糊、呼吸急促、反复表达"不想麻烦人"等。这些可能是中风、心脏问题或抑郁的前兆，发现后需立即上报。', keywords: '健康 预警 老年' },
+      { title: '志愿者自我关怀指南', src: '公益时报', desc: '长期接触悲伤故事可能引发替代性创伤。建议：每周至少一次同行交流、保持个人生活边界、发现情绪变化及时寻求督导帮助。志愿者也是需要被关心的群体。', keywords: '志愿者 自我关怀 心理' },
+      { title: '老年人听力下降的沟通策略', src: '听力健康联盟', desc: '约60%的老年人存在不同程度听力损失。通话时：放慢语速而非提高音量、用简单句子表达、给老人足够反应时间、重要信息重复确认。', keywords: '听力 老人 沟通策略' },
+      { title: '《老年权益保障法》志愿服务相关条款', src: '法律法规网', desc: '了解老年人在健康、财产、精神慰藉等方面的法定权利。志愿者在服务中如发现老人权益受侵害，应及时协助联系社区或法律援助渠道。', keywords: '法律 权益 保障' },
+      { title: '临终关怀中的电话陪伴技巧', src: '安宁疗护协会', desc: '当服务对象进入后生命期，通话目标是"陪伴"而非"解决问题"。接受沉默的存在、允许表达悲伤、不强行转移话题，是此时最珍贵的礼物。', keywords: '临终关怀 陪伴 技巧' },
+      { title: '社区资源对接操作手册', src: '社工实务', desc: '了解社区免费资源：助餐服务、适老化改造申请、免费体检通知、日间照料中心入住流程。志愿者可帮老人在电话中完成预约或转介。', keywords: '社区 资源 对接' },
+      { title: '紧急情况下如何联动社区与110', src: '应急管理部', desc: '确认老人地址后：立即拨打120（健康危机）/ 110（安全威胁）、说明"失独老人"身份以获得优先处理、同时电话联系社区网格员、通话后24小时内填写应急处置表单。', keywords: '紧急 流程 联动' },
+      { title: '同辈志愿者经验分享集', src: '志愿者论坛', desc: '"第三次通话张爷爷才主动开口说老伴去世的事，我没说太多，就听他说了一个小时。后来社工告诉我那是他第一次跟外人提起。有时候什么都不说比说更重要。"——志愿者李姐，服务3年', keywords: '经验 分享 同辈' }
+    ];
+
+    function getOnlineResults(q) {
+      q = q.toLowerCase();
+      return onlineDB.filter(function(r) {
+        return r.keywords.toLowerCase().indexOf(q) !== -1 || r.title.toLowerCase().indexOf(q) !== -1;
+      });
+    }
+
+    function addFromOnline(idx, btn) {
+      if (btn.classList.contains('added')) return;
+      var r = window._onlineResults[idx];
+      if (!r) return;
+      trains.unshift({title: r.title, desc: r.desc});
+      saveTrains();
+      filterTrains();
+      btn.textContent = '已添加';
+      btn.classList.add('added');
+    }
+    /* ---------- end 培训资料 ---------- */
+
+    function openModal(id, cb) {
+      document.getElementById(id).classList.add('open');
+      if (id === 'modal-training') {
+        loadTrains();
+        filterTrains();
+      }
+      if (id === 'modal-tips') {
+        loadTips();
+        filterTips();
+      }
+      cb && cb();
+    }
+    function closeModal() {
+      document.querySelectorAll('.modal-ovl').forEach(function(m) { m.classList.remove('open'); });
+    }
+    function submitFeedback() {
+      closeModal();
+      var t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(function(){ t.classList.remove('show'); }, 2000);
+    }
+    function handleLogout() {
+      localStorage.removeItem('volunteerLoggedIn');
+      localStorage.removeItem('volunteerPhone');
+      location.replace('screen-login.html');
+    }
+
+    loadTips();
+    loadTrains();
+
+    document.querySelectorAll('.menu-item').forEach(function(item, i) {
+      item.addEventListener('click', function() {
+        var ids = ['modal-training', 'modal-tips', 'modal-help'];
+        if (ids[i]) openModal(ids[i]);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!-- pages/contacts/contacts.wxml — 老人列表页 -->
+<view class="contacts-page">
+  <!-- 头部 -->
+  <view class="header" style="padding-top: {{statusBarHeight + 12}}px;">
+    <view class="header-left">
+      <text class="header-title font-display">暖心通话</text>
+      <text class="header-volunteer text-sm text-muted">{{volunteer.name || '志愿者'}}</text>
+    </view>
+    <view class="header-actions">
+      <view class="icon-btn" bindtap="onToggleSearch">
+        <text class="icon-emoji">🔍</text>
+      </view>
+      <view class="icon-btn" bindtap="onLogout">
+        <text class="icon-emoji" style="color:var(--danger);">🚪</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-bar" wx:if="{{showSearch}}">
+    <view class="search-input-wrap">
+      <text class="search-icon">🔍</text>
+      <input
+        class="search-input"
+        placeholder="搜索姓名、地址、爱好..."
+        value="{{searchQuery}}"
+        bindinput="onSearchInput"
+        focus="{{true}}"
+      />
+      <text class="search-clear" wx:if="{{searchQuery}}" bindtap="onClearSearch">✕</text>
+    </view>
+  </view>
+
+  <!-- 快捷统计 -->
+  <view class="quick-stats">
+    <view
+      class="quick-stat {{activeFilter === 'all' ? 'active' : ''}}"
+      data-filter="all"
+      bindtap="onFilterTap"
+    >
+      <text class="stat-val font-display">{{quickStats.total}}</text>
+      <text class="stat-lbl text-xs text-meta">在册老人</text>
+    </view>
+    <view
+      class="quick-stat {{activeFilter === 'today' ? 'active' : ''}}"
+      data-filter="today"
+      bindtap="onFilterTap"
+    >
+      <text class="stat-val font-display" style="color:var(--success);">{{quickStats.todayCalled}}</text>
+      <text class="stat-lbl text-xs text-meta">今日已联系</text>
+    </view>
+    <view
+      class="quick-stat {{activeFilter === 'priority' ? 'active' : ''}}"
+      data-filter="priority"
+      bindtap="onFilterTap"
+    >
+      <text class="stat-val font-display" style="color:var(--danger);">{{quickStats.priority}}</text>
+      <text class="stat-lbl text-xs text-meta">需优先关怀</text>
+    </view>
+  </view>
+
+  <!-- 联系人列表 -->
+  <scroll-view class="contact-list" scroll-y enhanced show-scrollbar="{{false}}">
+    <!-- 加载中 -->
+    <view class="empty-state" wx:if="{{loading}}">
+      <text>加载中...</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:elif="{{filteredList.length === 0}}">
+      <text wx:if="{{searchQuery}}">未找到匹配的老人</text>
+      <text wx:else>暂无老人数据</text>
+    </view>
+
+    <!-- 列表 -->
+    <block wx:else>
+      <view
+        class="contact-card"
+        wx:for="{{filteredList}}"
+        wx:key="_id"
+        data-id="{{item._id}}"
+      >
+        <!-- 卡片主体（可点击展开） -->
+        <view class="card-row" bindtap="onToggleExpand" data-id="{{item._id}}">
+          <!-- 头像 -->
+          <view class="avatar {{item.gender === '女' ? 'avatar-female' : 'avatar-male'}}">
+            <text>{{item.surname}}</text>
+          </view>
+
+          <!-- 信息 -->
+          <view class="card-info">
+            <view class="card-name-row">
+              <text class="card-name">{{item.name}}</text>
+              <text class="card-meta text-xs text-meta">{{item.age}}岁 · {{item.district}}</text>
+            </view>
+            <view class="card-status-row">
+              <text
+                wx:if="{{item.callStatus === 'today'}}"
+                class="status-badge status-success"
+              >今天联系过</text>
+              <text
+                wx:elif="{{item.callStatus === 'overdue'}}"
+                class="status-badge status-danger"
+              >需优先关怀</text>
+              <text
+                wx:elif="{{item.lastCallAt}}"
+                class="text-xs text-meta"
+              >{{item.callStatusLabel}}</text>
+            </view>
+          </view>
+
+          <!-- 拨号按钮 -->
+          <call-btn
+            elderlyId="{{item._id}}"
+            phoneNumber="{{item.phone}}"
+            elderlyName="{{item.name}}"
+            size="normal"
+          />
+        </view>
+
+        <!-- 展开面板 -->
+        <view class="expand-panel {{expandedId === item._id ? 'open' : ''}}">
+          <block wx:if="{{expandedId === item._id}}">
+            <!-- 上次通话摘要 -->
+            <view class="expand-section" wx:if="{{item.lastCallAt}}">
+              <text class="expand-label text-xs text-meta">📝 上次通话 {{item.callStatusLabel}}</text>
+              <text class="expand-summary text-sm">
+                {{item.lastSummary || '暂无通话记录，可查看详情页面了解更多信息。'}}
+              </text>
+            </view>
+
+            <!-- 标签 -->
+            <view class="expand-section" wx:if="{{item.tags && item.tags.length}}">
+              <text class="expand-label text-xs text-meta">🏷️ 标签</text>
+              <view class="expand-tags">
+                <text class="chip chip-neutral" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
+              </view>
+            </view>
+
+            <!-- 建议话题 -->
+            <view class="expand-section">
+              <text class="expand-label text-xs text-meta">💡 建议话题</text>
+              <view class="expand-suggestions">
+                <view class="sug-item" wx:for="{{item.hobbies}}" wx:key="*this" wx:if="{{index < 3}}">
+                  <view class="sug-num">{{index + 1}}</view>
+                  <text class="sug-text text-sm">
+                    <block wx:if="{{index === 0}}">聊聊{{item.name}}最近在做的"{{item}}"</block>
+                    <block wx:elif="{{index === 1}}">关心健康状况："{{item.healthNote || '最近身体怎么样？'}}"</block>
+                    <block wx:else>问候家人情况，了解生活近况</block>
+                  </text>
+                </view>
+              </view>
+            </view>
+
+            <!-- 查看完整资料 -->
+            <view class="expand-link" bindtap="onViewDetail" data-id="{{item._id}}">
+              <text>查看完整资料 →</text>
+            </view>
+          </block>
+        </view>
+      </view>
+    </block>
+  </scroll-view>
+</view>

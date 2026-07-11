@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "screen-contacts.html",
+  "entry": "screen-contacts.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-07-10T08:02:59.620Z",
+  "updatedAt": "2026-07-10T08:02:59.620Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

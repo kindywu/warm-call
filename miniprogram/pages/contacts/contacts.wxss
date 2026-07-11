@@ -1,0 +1,341 @@
+/* pages/contacts/contacts.wxss — 老人列表页样式 */
+
+.contacts-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  background: var(--bg);
+  padding-bottom: 55px;
+  box-sizing: border-box;
+}
+
+/* ===== 头部 ===== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px 16px;
+  background: var(--bg);
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-title {
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--fg);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.header-volunteer {
+  margin-top: 2px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg);
+  transition: background 0.15s;
+}
+
+.icon-btn:active {
+  background: var(--border-warm);
+}
+
+.icon-emoji {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ===== 搜索栏 ===== */
+.search-bar {
+  padding: 12px 20px;
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+.search-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+}
+
+.search-input-wrap:focus-within {
+  border-color: var(--accent);
+}
+
+.search-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: 0;
+  background: none;
+  font-size: 15px;
+  color: var(--fg);
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: var(--meta);
+}
+
+.search-clear {
+  font-size: 14px;
+  color: var(--meta);
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+/* ===== 快捷统计 ===== */
+.quick-stats {
+  display: flex;
+  gap: 10px;
+  padding: 8px 20px 16px;
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+.quick-stat {
+  flex: 1;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  text-align: center;
+  border: 1px solid var(--border);
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.quick-stat:active {
+  background: var(--border);
+}
+
+.quick-stat.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+  background: rgba(201, 100, 66, 0.06);
+}
+
+.stat-val {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--fg);
+  letter-spacing: -0.01em;
+}
+
+.quick-stat.active .stat-val {
+  color: var(--accent);
+}
+
+.stat-lbl {
+  margin-top: 4px;
+}
+
+/* ===== 联系人列表 ===== */
+.contact-list {
+  flex: 1;
+  padding: 0 20px;
+  background: var(--bg);
+}
+
+.contact-card {
+  border-bottom: 1px solid var(--border);
+}
+
+.contact-card:last-child {
+  border-bottom: 0;
+}
+
+/* 卡片行 */
+.card-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.card-row:active {
+  background: var(--bg);
+}
+
+/* 头像 */
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 500;
+  color: #faf9f5;
+  letter-spacing: 0.02em;
+}
+
+.avatar-female {
+  background: var(--accent);
+}
+
+.avatar-male {
+  background: var(--muted);
+}
+
+/* 信息区 */
+.card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.card-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.card-meta {
+  flex-shrink: 0;
+}
+
+.card-status-row {
+  display: flex;
+  align-items: center;
+}
+
+/* 状态徽标 */
+.status-badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.status-success {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.status-danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* ===== 展开面板 ===== */
+.expand-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  background: var(--surface);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.expand-panel.open {
+  max-height: 500px;
+  padding: 16px;
+  margin-bottom: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.expand-section {
+  margin-bottom: 12px;
+}
+
+.expand-section:last-child {
+  margin-bottom: 0;
+}
+
+.expand-label {
+  margin-bottom: 6px;
+}
+
+.expand-summary {
+  color: var(--fg);
+  line-height: 1.6;
+}
+
+.expand-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* 建议话题 */
+.expand-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sug-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.sug-num {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #faf9f5;
+  font-size: 10px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.sug-text {
+  color: var(--fg);
+  line-height: 1.5;
+  flex: 1;
+}
+
+/* 查看详情 */
+.expand-link {
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.expand-link:active {
+  opacity: 0.8;
+}

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "screen-incoming-call.html",
+  "entry": "screen-incoming-call.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-07-10T08:02:14.744Z",
+  "updatedAt": "2026-07-10T08:02:14.744Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

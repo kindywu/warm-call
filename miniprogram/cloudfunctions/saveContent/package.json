@@ -1,0 +1,9 @@
+{
+  "name": "saveContent",
+  "version": "1.0.0",
+  "description": "暖心通话 · 内容管理云函数（培训/技巧写代理）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~3.0.0"
+  }
+}

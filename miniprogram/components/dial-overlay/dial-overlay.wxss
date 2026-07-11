@@ -1,0 +1,108 @@
+/* components/dial-overlay/dial-overlay.wxss — 拨号覆盖层样式 */
+
+.dial-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 19, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+}
+
+.dial-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 头像 */
+.dial-avatar {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 60rpx;
+  font-weight: 500;
+  color: #faf9f5;
+  letter-spacing: 0.02em;
+}
+
+.dial-avatar.female {
+  background: var(--accent);
+}
+
+.dial-avatar.male {
+  background: var(--muted);
+}
+
+/* 姓名 */
+.dial-name {
+  font-family: var(--font-display);
+  font-size: 48rpx;
+  font-weight: 500;
+  color: #faf9f5;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
+/* 状态 */
+.dial-status {
+  font-size: 28rpx;
+  color: #b0aea5;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+/* 动画点 */
+.dial-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.dial-dots .dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: #b0aea5;
+  animation: dotBounce 1.4s ease-in-out infinite;
+}
+
+.dial-dots .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dial-dots .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* 挂断按钮 */
+.dial-hangup {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  background: var(--danger);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s;
+  margin-top: 32rpx;
+}
+
+.dial-hangup:active {
+  transform: scale(0.9);
+}
+
+.hangup-icon {
+  font-size: 48rpx;
+  transform: rotate(135deg);
+  line-height: 1;
+}

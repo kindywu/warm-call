@@ -1,0 +1,1135 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>暖心通话 — 老人列表</title>
+  <style>
+    /* ─── Claude tokens ──────────────────────────────────────────────── */
+    :root {
+      --bg: #f5f4ed;
+      --surface: #faf9f5;
+      --fg: #141413;
+      --muted: #5e5d59;
+      --meta: #87867f;
+      --border: #f0eee6;
+      --border-warm: #e8e6dc;
+      --accent: #c96442;
+      --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
+      --accent-hover: color-mix(in oklch, var(--accent) 88%, black);
+      --dark: #30302e;
+      --danger: #b53333;
+      --success: #17a34a;
+
+      --font-display: Georgia, "Times New Roman", serif;
+      --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --font-mono: ui-monospace, "JetBrains Mono", Menlo, monospace;
+
+      --radius: 10px;
+      --radius-lg: 16px;
+      --radius-sm: 8px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #1a1a18;
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: 0;
+      background: none;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* ─── Phone frame ─────────────────────────────────────────────── */
+    .phone {
+      width: 390px;
+      height: 844px;
+      background: var(--surface);
+      border-radius: 40px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 3px solid #3d3d3a;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    /* ─── Status bar ──────────────────────────────────────────────── */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px 8px;
+      background: var(--surface);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--fg);
+      flex-shrink: 0;
+    }
+
+    .status-bar .time {
+      font-weight: 600;
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-icons svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--fg);
+      fill: none;
+      stroke-width: 1.5;
+    }
+
+    /* ─── Header ──────────────────────────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px 16px;
+      background: var(--surface);
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header h1 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--fg);
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--bg);
+      color: var(--muted);
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      background: var(--border-warm);
+      color: var(--fg);
+    }
+
+    .icon-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.6;
+    }
+
+    /* ─── Search bar ──────────────────────────────────────────────── */
+    .search-bar {
+      padding: 12px 20px;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .search-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      transition: border-color 0.15s ease;
+    }
+
+    .search-input:focus-within {
+      border-color: var(--accent);
+    }
+
+    .search-input svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--meta);
+      fill: none;
+      stroke-width: 1.6;
+      flex-shrink: 0;
+    }
+
+    .search-input input {
+      flex: 1;
+      border: 0;
+      background: none;
+      font-size: 15px;
+      color: var(--fg);
+      outline: none;
+      font-family: var(--font-body);
+    }
+
+    .search-input input::placeholder {
+      color: var(--meta);
+    }
+
+    /* ─── Quick stats ─────────────────────────────────────────────── */
+    .quick-stats {
+      display: flex;
+      gap: 10px;
+      padding: 8px 20px 16px;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .quick-stat {
+      flex: 1;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .quick-stat .stat-val {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--fg);
+      line-height: 1;
+      letter-spacing: -0.01em;
+    }
+
+    .quick-stat .stat-lbl {
+      font-size: 11px;
+      color: var(--meta);
+      margin-top: 4px;
+    }
+
+    .quick-stat {
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .quick-stat:hover {
+      border-color: var(--border-warm);
+      background: var(--border);
+    }
+
+    .quick-stat.active {
+      background: color-mix(in oklch, var(--accent) 10%, var(--surface));
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .quick-stat.active .stat-val {
+      color: var(--accent);
+    }
+
+    .quick-stat.active .stat-lbl {
+      color: var(--accent);
+    }
+
+    .contact-card.hidden {
+      display: none;
+    }
+
+    /* ─── Expand panel ─────────────────────────────────────────────── */
+    .expand-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.35s ease, opacity 0.25s ease;
+      opacity: 0;
+      border-bottom: 1px solid transparent;
+      background: var(--bg);
+      border-radius: 0 0 var(--radius) var(--radius);
+      margin-top: 0;
+    }
+
+    .expand-panel.open {
+      max-height: 600px;
+      opacity: 1;
+      border-bottom-color: var(--border);
+      padding: 16px;
+      margin-bottom: 4px;
+    }
+
+    .expand-inner { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+    .expand-section { margin-bottom: 12px; }
+    .expand-section:last-child { margin-bottom: 0; }
+
+    .expand-label {
+      font-size: 11px; font-weight: 600;
+      color: var(--meta);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .expand-label svg { width: 14px; height: 14px; stroke: var(--meta); fill: none; stroke-width: 1.8; }
+
+    .expand-summary {
+      font-size: 14px; color: var(--fg);
+      line-height: 1.6;
+      margin-bottom: 4px;
+    }
+
+    .expand-tags {
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .expand-tag {
+      font-size: 11px; font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--border);
+      color: var(--muted);
+    }
+
+    .expand-suggestion {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .expand-suggestion:last-child { border-bottom: 0; }
+    .expand-sug-num {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #faf9f5;
+      font-size: 10px; font-weight: 600;
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+    .expand-sug-text { font-size: 13px; color: var(--fg); line-height: 1.5; flex: 1; }
+
+    .expand-detail-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-top: 10px;
+      font-size: 13px; font-weight: 600;
+      color: var(--accent);
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .expand-detail-btn:hover { opacity: 0.8; }
+    .expand-detail-btn svg { width: 14px; height: 14px; stroke: var(--accent); fill: none; stroke-width: 2; }
+
+    /* ─── Contact list ────────────────────────────────────────────── */
+    .contact-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 20px;
+      background: var(--surface);
+      scroll-behavior: smooth;
+    }
+
+    .contact-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.1s ease;
+    }
+
+    .contact-card:active {
+      background: var(--bg);
+    }
+
+    .contact-card:last-child {
+      border-bottom: 0;
+    }
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      color: #faf9f5;
+      letter-spacing: 0.02em;
+    }
+
+    .avatar-female {
+      background: #c96442;
+    }
+
+    .avatar-male {
+      background: #5e5d59;
+    }
+
+    .contact-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .contact-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--fg);
+      letter-spacing: -0.005em;
+      margin-bottom: 2px;
+    }
+
+    .contact-meta {
+      font-size: 13px;
+      color: var(--meta);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .contact-meta .dot {
+      width: 3px;
+      height: 3px;
+      background: var(--border-warm);
+      border-radius: 50%;
+    }
+
+    .call-status {
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 500;
+    }
+
+    .call-status.recent {
+      background: color-mix(in oklch, var(--success) 12%, transparent);
+      color: var(--success);
+    }
+
+    .call-status.overdue {
+      background: color-mix(in oklch, var(--danger) 12%, transparent);
+      color: var(--danger);
+    }
+
+    .call-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      transition: transform 0.1s ease, background 0.15s ease;
+      animation: pulse-call 2.4s ease-in-out infinite;
+    }
+
+    .call-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .call-btn:active {
+      transform: scale(0.92);
+    }
+
+    .call-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: #faf9f5;
+      fill: #faf9f5;
+      stroke-width: 0;
+    }
+
+    @keyframes pulse-call {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent) 30%, transparent);
+      }
+
+      50% {
+        box-shadow: 0 0 0 10px color-mix(in oklch, var(--accent) 0%, transparent);
+      }
+    }
+
+    /* ─── Bottom nav ──────────────────────────────────────────────── */
+    .bottom-nav {
+      display: flex;
+      align-items: center;
+      background: var(--dark);
+      padding: 8px 16px;
+      gap: 8px;
+      flex-shrink: 0;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 4px;
+      border-radius: var(--radius);
+      color: #87867f;
+      font-size: 11px;
+      font-weight: 500;
+      transition: color 0.15s ease, background 0.15s ease;
+      cursor: pointer;
+      background: none;
+      border: 0;
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.5;
+    }
+
+    .nav-item.active svg {
+      fill: var(--accent);
+      stroke: none;
+    }
+
+    /* ─── Home indicator ──────────────────────────────────────────── */
+    .home-indicator {
+      width: 134px;
+      height: 5px;
+      background: #faf9f5;
+      border-radius: 100px;
+      margin: 0 auto;
+      flex-shrink: 0;
+    }
+
+    .home-indicator-wrap {
+      padding: 8px 0;
+      background: var(--dark);
+      flex-shrink: 0;
+    }
+
+    /* ─── Dialing overlay ─────────────────────────────────────────── */
+    .dial-overlay {
+      position: absolute;
+      inset: 0;
+      background: color-mix(in oklch, var(--fg) 85%, transparent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      border-radius: 40px;
+      z-index: 20;
+    }
+
+    .dial-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .dial-overlay .dial-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-display);
+      font-size: 30px;
+      font-weight: 600;
+      color: #faf9f5;
+    }
+
+    .dial-overlay .dial-name {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 600;
+      color: #faf9f5;
+      letter-spacing: -0.01em;
+      text-align: center;
+    }
+
+    .dial-overlay .dial-status {
+      font-size: 14px;
+      color: #b0aea5;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dial-dot-anim {
+      display: flex;
+      gap: 4px;
+    }
+
+    .dial-dot-anim span {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #b0aea5;
+      animation: dot-bounce 1.4s ease-in-out infinite;
+    }
+
+    .dial-dot-anim span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .dial-dot-anim span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes dot-bounce {
+
+      0%,
+      80%,
+      100% {
+        opacity: 0.3;
+        transform: translateY(0);
+      }
+
+      40% {
+        opacity: 1;
+        transform: translateY(-4px);
+      }
+    }
+
+    .dial-hangup {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--danger);
+      display: grid;
+      place-items: center;
+      transition: transform 0.1s ease;
+      cursor: pointer;
+    }
+
+    .dial-hangup:active {
+      transform: scale(0.9);
+    }
+
+    .dial-hangup svg {
+      width: 24px;
+      height: 24px;
+      stroke: #faf9f5;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    @media (max-width: 430px) {
+      .phone {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        border: 0;
+      }
+
+      .dial-overlay {
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="phone" data-od-id="phone-contacts">
+    <!-- Status bar -->
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="status-icons">
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C17.93 4.07 6.07 4.07 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-6-6l2 2c2.76-2.76 7.24-2.76 10 0l2-2C13.14 7.14 5.86 7.14 3 11z" />
+        </svg>
+        <svg viewBox="0 0 24 24" style="width: 24px;">
+          <rect x="1" y="6" width="18" height="11" rx="2" stroke="currentColor" fill="none" />
+          <rect x="20" y="8" width="3" height="7" rx="1" fill="currentColor" />
+          <rect x="2" y="8" width="15" height="7" rx="1" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- App header -->
+    <header class="header" data-od-id="header">
+      <div>
+        <h1>暖心通话 <span
+            style="background:var(--accent);color:#faf9f5;font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;line-height:1.3;vertical-align:middle;margin-left:4px;">志愿者端</span>
+        </h1>
+        <div style="font-size:12px;color:var(--meta);margin-top:2px;font-weight:400;">志愿者 · 陈志远</div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" aria-label="搜索">
+          <svg viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="7" />
+            <path d="M21 21l-4.35-4.35" />
+          </svg>
+        </button>
+        <button class="icon-btn" aria-label="筛选">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 6h16M7 12h10M10 18h4" />
+          </svg>
+        </button>
+        <button class="icon-btn" aria-label="退出登录" onclick="handleLogout()" style="color:var(--danger);">
+          <svg viewBox="0 0 24 24">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <div class="search-input">
+        <svg viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M21 21l-4.35-4.35" />
+        </svg>
+        <input type="text" id="contact-search" placeholder="搜索老人姓名或地址…" oninput="searchContacts()" autocomplete="off" />
+      </div>
+    </div>
+
+    <!-- Quick stats -->
+    <div class="quick-stats" data-od-id="quick-stats">
+      <div class="quick-stat active" data-filter="all" onclick="filterContacts('all', this)">
+        <div class="stat-val">12</div>
+        <div class="stat-lbl">在册老人</div>
+      </div>
+      <div class="quick-stat" data-filter="today" onclick="filterContacts('today', this)">
+        <div class="stat-val">8</div>
+        <div class="stat-lbl">今日已联系</div>
+      </div>
+      <div class="quick-stat" data-filter="overdue" onclick="filterContacts('overdue', this)">
+        <div class="stat-val">2</div>
+        <div class="stat-lbl">需优先关怀</div>
+      </div>
+    </div>
+
+    <!-- Contact list -->
+    <div class="contact-list" data-od-id="contact-list">
+      <div class="contact-card" data-od-id="contact-zhang" data-status="today" data-hobby="养花、听京剧、散步" data-profile="张书华"
+        onclick="toggleContact(this,'张书华')">
+        <div class="avatar avatar-female">张</div>
+        <div class="contact-info">
+          <div class="contact-name">张书华</div>
+          <div class="contact-meta">
+            78岁 <span class="dot"></span> 独居·朝阳区
+            <span class="call-status recent">今天联系过</span>
+          </div>
+        </div>
+        <button class="call-btn" aria-label="拨打" onclick="event.stopPropagation();startDial('张书华','female')">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="contact-card" data-od-id="contact-li" data-status="today" data-hobby="下象棋、看新闻、公园遛弯" data-profile="李国栋"
+        onclick="toggleContact(this,'李国栋')">
+        <div class="avatar avatar-male">李</div>
+        <div class="contact-info">
+          <div class="contact-name">李国栋</div>
+          <div class="contact-meta">
+            82岁 <span class="dot"></span> 独居·海淀区
+            <span class="call-status recent">今天联系过</span>
+          </div>
+        </div>
+        <button class="call-btn" aria-label="拨打" onclick="event.stopPropagation();startDial('李国栋','male')">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="contact-card" data-od-id="contact-wang" data-status="overdue" data-hobby="织毛衣、看电视、养猫" data-profile="王秀英"
+        onclick="toggleContact(this,'王秀英')">
+        <div class="avatar avatar-female">王</div>
+        <div class="contact-info">
+          <div class="contact-name">王秀英</div>
+          <div class="contact-meta">
+            76岁 <span class="dot"></span> 独居·西城区
+            <span class="call-status overdue">1周前联系过</span>
+          </div>
+        </div>
+        <button class="call-btn" aria-label="拨打" onclick="event.stopPropagation();startDial('王秀英','female')">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="contact-card" data-od-id="contact-zhao" data-status="overdue" data-hobby="书法、听评书、看球赛" data-profile="赵明德"
+        onclick="toggleContact(this,'赵明德')">
+        <div class="avatar avatar-male">赵</div>
+        <div class="contact-info">
+          <div class="contact-name">赵明德</div>
+          <div class="contact-meta">
+            80岁 <span class="dot"></span> 独居·丰台区
+            <span class="call-status overdue">从未联系过</span>
+          </div>
+        </div>
+        <button class="call-btn" aria-label="拨打" onclick="event.stopPropagation();startDial('赵明德','male')">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="contact-card" data-od-id="contact-chen" data-status="recent" data-hobby="剪纸、养鱼、听民歌" data-profile="陈月娥"
+        onclick="toggleContact(this,'陈月娥')">
+        <div class="avatar avatar-female">陈</div>
+        <div class="contact-info">
+          <div class="contact-name">陈月娥</div>
+          <div class="contact-meta">
+            79岁 <span class="dot"></span> 独居·东城区
+            <span class="call-status recent">2天前联系过</span>
+          </div>
+        </div>
+        <button class="call-btn" aria-label="拨打" onclick="event.stopPropagation();startDial('陈月娥','female')">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="contact-card" data-od-id="contact-liu" data-status="recent" data-hobby="唱歌、和老姐妹散步、做面食" data-profile="刘桂兰"
+        onclick="toggleContact(this,'刘桂兰')">
+        <div class="avatar avatar-female">刘</div>
+        <div class="contact-info">
+          <div class="contact-name">刘桂兰</div>
+          <div class="contact-meta">
+            74岁 <span class="dot"></span> 独居·石景山区
+            <span class="call-status recent">昨天联系过</span>
+          </div>
+        </div>
+        <button class="call-btn" aria-label="拨打" onclick="event.stopPropagation();startDial('刘桂兰','female')">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="contact-card" data-od-id="contact-sun" data-status="today" data-hobby="广场舞、养花、看养生节目" data-profile="孙玉兰"
+        onclick="toggleContact(this,'孙玉兰')">
+        <div class="avatar avatar-female">孙</div>
+        <div class="contact-info">
+          <div class="contact-name">孙玉兰</div>
+          <div class="contact-meta">
+            81岁 <span class="dot"></span> 独居·通州区
+            <span class="call-status recent">今天联系过</span>
+          </div>
+        </div>
+        <button class="call-btn" aria-label="拨打" onclick="event.stopPropagation();startDial('孙玉兰','female')">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="contact-card" data-od-id="contact-zhou" data-status="today" data-hobby="太极拳、看新闻、下象棋" data-profile="周国平"
+        onclick="toggleContact(this,'周国平')">
+        <div class="avatar avatar-male">周</div>
+        <div class="contact-info">
+          <div class="contact-name">周国平</div>
+          <div class="contact-meta">
+            77岁 <span class="dot"></span> 独居·昌平区
+            <span class="call-status recent">今天联系过</span>
+          </div>
+        </div>
+        <button class="call-btn" aria-label="拨打" onclick="event.stopPropagation();startDial('周国平','male')">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="contact-card" data-od-id="contact-wu" data-status="today" data-hobby="做手工、看电视、信佛" data-profile="吴美琴"
+        onclick="toggleContact(this,'吴美琴')">
+        <div class="avatar avatar-female">吴</div>
+        <div class="contact-info">
+          <div class="contact-name">吴美琴</div>
+          <div class="contact-meta">
+            83岁 <span class="dot"></span> 独居·大兴区
+            <span class="call-status recent">今天联系过</span>
+          </div>
+        </div>
+        <button class="call-btn" aria-label="拨打" onclick="event.stopPropagation();startDial('吴美琴','female')">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="contact-card" data-od-id="contact-zheng" data-status="today" data-hobby="钓鱼、看球赛、养鸟" data-profile="郑德厚"
+        onclick="toggleContact(this,'郑德厚')">
+        <div class="avatar avatar-male">郑</div>
+        <div class="contact-info">
+          <div class="contact-name">郑德厚</div>
+          <div class="contact-meta">
+            75岁 <span class="dot"></span> 独居·顺义区
+            <span class="call-status recent">今天联系过</span>
+          </div>
+        </div>
+        <button class="call-btn" aria-label="拨打" onclick="event.stopPropagation();startDial('郑德厚','male')">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="contact-card" data-od-id="contact-huang" data-status="today" data-hobby="种菜、腌咸菜、和老姐妹唠嗑" data-profile="黄翠英"
+        onclick="toggleContact(this,'黄翠英')">
+        <div class="avatar avatar-female">黄</div>
+        <div class="contact-info">
+          <div class="contact-name">黄翠英</div>
+          <div class="contact-meta">
+            80岁 <span class="dot"></span> 独居·房山区
+            <span class="call-status recent">今天联系过</span>
+          </div>
+        </div>
+        <button class="call-btn" aria-label="拨打" onclick="event.stopPropagation();startDial('黄翠英','female')">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="contact-card" data-od-id="contact-lin" data-status="today" data-hobby="听戏、织毛线、看老照片" data-profile="林秀珍"
+        onclick="toggleContact(this,'林秀珍')">
+        <div class="avatar avatar-female">林</div>
+        <div class="contact-info">
+          <div class="contact-name">林秀珍</div>
+          <div class="contact-meta">
+            84岁 <span class="dot"></span> 独居·平谷区
+            <span class="call-status recent">今天联系过</span>
+          </div>
+        </div>
+        <button class="call-btn" aria-label="拨打" onclick="event.stopPropagation();startDial('林秀珍','female')">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom navigation -->
+    <nav class="bottom-nav" data-od-id="bottom-nav">
+      <button class="nav-item active">
+        <svg viewBox="0 0 24 24">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+        </svg>
+        联系人
+      </button>
+      <button class="nav-item" onclick="location.href='screen-stats.html'">
+        <svg viewBox="0 0 24 24"><rect x="4" y="14" width="4" height="7" rx="1"/><rect x="10" y="9" width="4" height="12" rx="1"/><rect x="16" y="4" width="4" height="17" rx="1"/></svg>
+        统计
+      </button>
+      <button class="nav-item" onclick="location.href='screen-volunteer.html'">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+        我的
+      </button>
+    </nav>
+
+    <div class="home-indicator-wrap">
+      <div class="home-indicator"></div>
+    </div>
+
+    <!-- Dialing overlay -->
+    <div class="dial-overlay" id="dialOverlay" data-od-id="dial-overlay">
+      <div class="dial-avatar avatar-female" id="dialAvatar">张</div>
+      <div class="dial-name" id="dialName">张书华</div>
+      <div class="dial-status">
+        正在呼叫
+        <div class="dial-dot-anim">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+      <button class="dial-hangup" onclick="endDial()" aria-label="挂断">
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M10.68 13.32a16 16 0 003.41 2.51l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07M23 1L1 23" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    function handleLogout() {
+      localStorage.removeItem('volunteerLoggedIn');
+      localStorage.removeItem('volunteerPhone');
+      location.replace('screen-login.html');
+    }
+
+    var profiles = {
+      '张书华': { gender:'female', age:78, location:'独居·朝阳区', lastCallDate:'今天 10:20', lastCallDuration:'通话 18 分钟', lastCallSummary:'老人聊到最近养的一盆君子兰开花了，心情很好。提到膝盖最近有点疼，已建议去社区卫生院看看。老人问志愿者下周还来不来电话。', tags:['情绪良好','健康关注','约定回访'], suggestions:['主动问问老人最近身体怎么样，膝盖还疼不疼，有没有按时吃药。','聊聊君子兰养得怎么样了，北京最近天气热，提醒老人多注意防暑。','问老人最近有没有出门散步，社区有没有什么活动可以参加。'], priority:'0' },
+      '李国栋': { gender:'male',   age:82, location:'独居·海淀区', lastCallDate:'今天 09:15', lastCallDuration:'通话 12 分钟', lastCallSummary:'老人说最近天气太热，白天基本不出门，晚上去公园走走。提到孙子考上大学很高兴。血糖值最近控制得不错。', tags:['情绪良好','家庭话题'], suggestions:['恭喜老人孙子考上大学，可以多聊聊这个话题，老人会很开心。','询问最近血糖控制情况，有没有按时测血糖。','关心老人天热注意防暑，问是否需要帮忙买些东西。'], priority:'0' },
+      '王秀英': { gender:'female', age:76, location:'独居·西城区', lastCallDate:'7月3日 10:00', lastCallDuration:'通话 15 分钟', lastCallSummary:'老人说她养的花猫最近不吃东西，很担心。提到腿脚不太方便，很久没下楼了。聊到年轻时在纺织厂工作的往事。', tags:['情绪低落','健康关注','动物陪伴'], suggestions:['先关心老人的花猫怎么样了，这是她最上心的事，可以建议去社区宠物医院看看。','问问最近有没有出门走走，腿脚不方便可以建议社区志愿者上门看望。','可以聊她年轻时在纺织厂的事，老人很愿意回忆。'], priority:'0' },
+      '赵明德': { gender:'male',   age:80, location:'独居·丰台区', lastCallDate:'——', lastCallDuration:'——', lastCallSummary:'尚无通话记录。这是首次联系，老人可能对陌生来电有警惕，建议耐心介绍自己和社区关怀项目，先建立信任。', tags:['首次联系','需耐心'], suggestions:['先自我介绍身份和社区关怀项目，说明是志愿者定期问候，不是推销。','可以聊老人喜欢的书法——这是破冰的好话题，问问最近在写什么。','关心老人生活起居，问平时买菜做饭方便不方便，需要什么帮助。'], priority:'1' },
+      '陈月娥': { gender:'female', age:79, location:'独居·东城区', lastCallDate:'7月8日 16:00', lastCallDuration:'通话 22 分钟', lastCallSummary:'老人说最近睡眠不太好，经常凌晨三四点就醒了。聊到年轻时在文化馆学剪纸的往事很兴奋，说可以教志愿者。鱼缸里新买了三条金鱼。', tags:['睡眠问题','有分享欲','生活乐趣'], suggestions:['关心老人最近的睡眠，建议睡前泡个脚、听点轻音乐。','可以请老人讲讲剪纸的事，她很想分享，这是让她开心的好话题。','问问三条金鱼怎么样了，老人给它们起名字了没有。'], priority:'0' },
+      '刘桂兰': { gender:'female', age:74, location:'独居·石景山区', lastCallDate:'昨天 15:45', lastCallDuration:'通话 10 分钟', lastCallSummary:'老人昨天去社区活动中心唱了歌，心情很好。蒸了豆沙包想送给志愿者但不知道怎么寄。腰有点酸，已经贴了膏药。', tags:['情绪良好','社区活动','有分享欲'], suggestions:['问问昨天唱歌唱了什么，老人喜欢唱歌可以多陪她聊这个话题。','提醒腰疼要多休息，可以建议一些简单的伸展动作。','如果有条件，问问社区能不能帮忙安排志愿者见面拿豆沙包。'], priority:'0' },
+      '孙玉兰': { gender:'female', age:81, location:'独居·通州区', lastCallDate:'今天 08:45', lastCallDuration:'通话 20 分钟', lastCallSummary:'老人说昨晚睡得不错，早上还去小区跳了半小时广场舞。血压量过正常，药都按时吃。聊到想买一盆茉莉花但不会网购，答应帮她查查。', tags:['情绪良好','生活积极','需要帮助'], suggestions:['帮老人查查附近花市或者网购茉莉花的方法，可以下次通话教她。','了解老人最近广场舞的情况，可以夸她坚持锻炼身体好。','关注血压情况，提醒天热注意多喝水、避免中午出门。'], priority:'0' },
+      '周国平': { gender:'male',   age:77, location:'独居·昌平区', lastCallDate:'今天 09:30', lastCallDuration:'通话 14 分钟', lastCallSummary:'老人最近在学二十四式太极拳，说邻居教了他几招。颈椎还是不太舒服，已经约了下周去社区医院推拿。问志愿者认不认识会下象棋的人。', tags:['情绪良好','健康关注','社交需求'], suggestions:['了解老人太极拳学得怎么样，肯定他主动锻炼的态度。','问问颈椎推拿约好时间了没有，提醒按时去，可以做个回访记录。','可以帮老人在社区活动中心打听有没有棋友，下次通话告知。'], priority:'0' },
+      '吴美琴': { gender:'female', age:83, location:'独居·大兴区', lastCallDate:'今天 11:10', lastCallDuration:'通话 25 分钟', lastCallSummary:'老人聊了很多年轻时的事，说以前在服装厂做了三十年。最近膝盖不太疼了因为天气暖和。自己做了一双布鞋送给邻居家小孩。家里小佛像前每天都会上香。', tags:['情绪良好','有分享欲','生活充实'], suggestions:['夸老人手巧，可以多聊聊做手工的话题，老人会很高兴。','关心膝盖情况，提醒天热也要注意关节不要着凉。','了解老人信佛多久了，但不要深入讨论宗教话题，尊重就好。'], priority:'0' },
+      '郑德厚': { gender:'male',   age:75, location:'独居·顺义区', lastCallDate:'今天 14:00', lastCallDuration:'通话 11 分钟', lastCallSummary:'老人刚午睡起来，说今天天气不错想去河边走走。聊到前几天去钓鱼钓到一条两斤的鲤鱼很开心。最近睡得不太好，夜里要起来好几次。', tags:['情绪良好','健康关注','户外兴趣'], suggestions:['聊聊钓鱼的事，老人喜欢这个话题可以让通话变得轻松。','关切睡眠问题，建议白天适当活动、晚上少喝水，必要时建议看泌尿科。','问问养的鸟怎么样了，让他讲讲养鸟的趣事。'], priority:'0' },
+      '黄翠英': { gender:'female', age:80, location:'独居·房山区', lastCallDate:'今天 09:50', lastCallDuration:'通话 16 分钟', lastCallSummary:'老人说阳台上的番茄红了几个特别高兴，打算留一个给志愿者。邻居送了自己腌的黄瓜，说比买的好吃。社区通知下周有免费体检打算去。', tags:['情绪良好','生活乐趣','健康意识'], suggestions:['赞美老人阳台种菜，可以请教一下怎么种番茄，让她有成就感。','提醒下周体检的事，问她知道具体时间地点了吗，可以帮忙确认。','问问腌黄瓜的方子，但提醒少吃咸的注意血脂。'], priority:'0' },
+      '林秀珍': { gender:'female', age:84, location:'独居·平谷区', lastCallDate:'今天 13:15', lastCallDuration:'通话 22 分钟', lastCallSummary:'老人提到好几次同样的往事，但整体情绪稳定。翻出老照片讲了很多年轻时的事，说到老伴时有点伤感但很快就转移了话题。正在给外甥孙女织一件小毛衣。', tags:['情绪波动','记忆减退','需耐心'], suggestions:['耐心听老人重复讲的事情，不要打断或纠正，陪伴本身就是意义。','可以问毛衣织得怎么样了，夸她针线活好，让老人感到被肯定。','注意观察老人近期记忆是否持续变差，如有明显变化需向团队反馈。'], priority:'0' }
+    };
+
+    var _expandedCard = null;
+
+    function toggleContact(card, name) {
+      if (card === _expandedCard) {
+        collapseCard(card);
+        _expandedCard = null;
+        return;
+      }
+      if (_expandedCard) { collapseCard(_expandedCard); }
+      expandCard(card, name);
+      _expandedCard = card;
+    }
+
+    function collapseCard(card) {
+      var panel = card.nextElementSibling;
+      if (panel && panel.classList.contains('expand-panel')) {
+        panel.classList.remove('open');
+        setTimeout(function () { if (panel.parentNode) panel.remove(); }, 350);
+      }
+    }
+
+    function expandCard(card, name) {
+      var p = profiles[name];
+      if (!p) { openDetail(name); return; }
+
+      var durLine = '';
+      if (p.lastCallDate !== '——') {
+        durLine = '<div style="font-size:13px;color:var(--muted);margin-bottom:6px;">' + p.lastCallDate + ' · ' + p.lastCallDuration + '</div>';
+      }
+
+      var html = '<div class="expand-panel open"><div class="expand-inner">';
+      html += '<div class="expand-section"><div class="expand-label"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>上次通话</div>';
+      html += durLine;
+      html += '<div class="expand-summary">' + p.lastCallSummary + '</div>';
+      html += '<div class="expand-tags">';
+      p.tags.forEach(function (t) { html += '<span class="expand-tag">' + t + '</span>'; });
+      html += '</div></div>';
+
+      html += '<div class="expand-section"><div class="expand-label"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>建议话题</div>';
+      p.suggestions.forEach(function (s, i) {
+        html += '<div class="expand-suggestion"><div class="expand-sug-num">' + (i + 1) + '</div><div class="expand-sug-text">' + s + '</div></div>';
+      });
+      html += '</div>';
+
+      html += '<div class="expand-detail-btn" onclick="event.stopPropagation();openDetail(\'' + name + '\')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>查看完整资料</div>';
+      html += '</div></div>';
+
+      card.insertAdjacentHTML('afterend', html);
+    }
+
+    function openDetail(name) {
+      var p = profiles[name];
+      if (!p) return;
+      var lastCall = p.lastCallDate === '——' ? '从未联系过' : '今天联系过';
+      var status = p.lastCallDate === '——' ? 'overdue' : 'today';
+      localStorage.setItem('contactDetail', JSON.stringify({
+        name: name, gender: p.gender, age: p.age, location: p.location,
+        lastCall: lastCall, status: status, priority: p.priority
+      }));
+      location.href = 'screen-contact-detail.html';
+    }
+
+    function searchContacts() {
+      var q = (document.getElementById('contact-search').value || '').trim().toLowerCase();
+      var activeFilter = document.querySelector('.quick-stat.active');
+      var filter = activeFilter ? activeFilter.dataset.filter : 'all';
+
+      document.querySelectorAll('.contact-card').forEach(function (card) {
+        var name = (card.querySelector('.contact-name') || {}).textContent || '';
+        var meta = (card.querySelector('.contact-meta') || {}).textContent || '';
+        var hobby = (card.dataset.hobby || '');
+        var text = (name + ' ' + meta + ' ' + hobby).toLowerCase();
+        var statusMatch = filter === 'all' || card.dataset.status === filter;
+        var searchMatch = !q || text.indexOf(q) !== -1;
+        var hidden = !(statusMatch && searchMatch);
+        card.classList.toggle('hidden', hidden);
+        if (hidden && card === _expandedCard) { collapseCard(card); _expandedCard = null; }
+      });
+    }
+
+    function filterContacts(filter, el) {
+      document.querySelectorAll('.quick-stat').forEach(function (s) { s.classList.remove('active'); });
+      el.classList.add('active');
+      searchContacts();
+    }
+
+    function startDial(name, gender) {
+      var overlay = document.getElementById('dialOverlay');
+      var avatar = document.getElementById('dialAvatar');
+      var nameEl = document.getElementById('dialName');
+      overlay.classList.add('active');
+      avatar.textContent = name.charAt(0);
+      avatar.className = 'dial-avatar ' + (gender === 'female' ? 'avatar-female' : 'avatar-male');
+      nameEl.textContent = name;
+    }
+    function endDial() {
+      document.getElementById('dialOverlay').classList.remove('active');
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,79 @@
+<!-- pages/volunteer/volunteer.wxml — 我的 · 志愿者中心 -->
+<view class="volunteer-page">
+  <!-- 头部 -->
+  <view class="header" style="padding-top: {{statusBarHeight + 12}}px;">
+    <text class="header-title font-display">我的</text>
+  </view>
+
+  <scroll-view class="scroll-area" scroll-y enhanced show-scrollbar="{{false}}">
+    <!-- 志愿者资料卡 -->
+    <view class="profile-card">
+      <view class="volunteer-avatar">
+        <text>{{volunteer.name ? volunteer.name[0] : '志'}}</text>
+      </view>
+      <view class="volunteer-info">
+        <text class="volunteer-name font-display">{{volunteer.name || '志愿者'}}</text>
+        <text class="volunteer-role text-sm text-accent">{{volunteer.role || '志愿者'}}</text>
+        <text class="volunteer-id text-xs font-mono text-meta">
+          编号 VF-{{volunteer.code || '000000'}}
+        </text>
+      </view>
+    </view>
+
+    <!-- 菜单列表 -->
+    <view class="menu-section">
+      <view class="menu-item" bindtap="onOpenTraining">
+        <text class="menu-icon">📚</text>
+        <text class="menu-text">培训资料</text>
+        <text class="menu-arrow text-meta">→</text>
+      </view>
+      <view class="menu-divider"></view>
+      <view class="menu-item" bindtap="onOpenTips">
+        <text class="menu-icon">💬</text>
+        <text class="menu-text">沟通技巧</text>
+        <text class="menu-arrow text-meta">→</text>
+      </view>
+      <view class="menu-divider"></view>
+      <view class="menu-item" bindtap="onOpenFeedback">
+        <text class="menu-icon">📝</text>
+        <text class="menu-text">反馈平台</text>
+        <text class="menu-arrow text-meta">→</text>
+      </view>
+      <view class="menu-divider"></view>
+      <view class="menu-item" bindtap="onLogout">
+        <text class="menu-icon">🚪</text>
+        <text class="menu-text text-danger">退出登录</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- ===== 帮助反馈弹窗 ===== -->
+  <view class="modal-overlay {{showFeedback ? 'active' : ''}}" catchtap="onCloseFeedback">
+    <view class="modal-panel" catchtap="">
+      <view class="modal-header">
+        <text class="modal-title font-display">反馈平台</text>
+        <view class="modal-close" bindtap="onCloseFeedback">
+          <text>✕</text>
+        </view>
+      </view>
+      <view class="feedback-form">
+        <textarea
+          class="feedback-textarea"
+          placeholder="请描述您的问题或建议..."
+          value="{{feedbackContent}}"
+          bindinput="onFeedbackContentInput"
+          maxlength="500"
+        />
+        <input
+          class="feedback-contact-input"
+          placeholder="联系方式（选填）"
+          value="{{feedbackContact}}"
+          bindinput="onFeedbackContactInput"
+          maxlength="50"
+        />
+        <button class="btn-submit-feedback" bindtap="onSubmitFeedback">提交反馈</button>
+      </view>
+    </view>
+  </view>
+
+</view>

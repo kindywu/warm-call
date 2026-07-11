@@ -1,0 +1,42 @@
+<!-- pages/login/login.wxml — 登录页面 -->
+<view class="login-page">
+  <!-- Hero 区域 -->
+  <view class="login-hero" style="padding-top: {{statusBarHeight + 60}}px;">
+    <view class="login-icon">
+      <text class="login-icon-text">📞</text>
+    </view>
+    <text class="login-title font-display">暖心通话</text>
+    <text class="login-subtitle">志愿者 · 失独老人关爱平台</text>
+  </view>
+
+  <!-- 登录区域 -->
+  <view class="login-body">
+    <view class="login-desc">
+      <text>通过微信登录，即可开始关怀之旅</text>
+    </view>
+
+    <!-- 静默登录按钮 -->
+    <button
+      class="btn-primary login-btn {{logging ? 'loading' : ''}}"
+      bindtap="onSilentLogin"
+      disabled="{{!agreed || logging}}"
+    >
+      {{logging ? '登录中...' : '微信一键登录'}}
+    </button>
+
+    <!-- 错误提示 -->
+    <view class="login-error" wx:if="{{loginError}}">
+      <text class="text-danger text-sm">{{loginError}}</text>
+    </view>
+
+    <!-- 协议勾选 -->
+    <view class="agreement-row">
+      <view class="checkbox-wrap {{agreed ? 'checked' : ''}}" bindtap="onAgreeChange">
+        <text class="checkbox-icon" wx:if="{{agreed}}">✓</text>
+      </view>
+      <text class="agreement-text text-sm">我已阅读并同意</text>
+      <text class="agreement-link text-sm" bindtap="onOpenUserAgreement">《用户协议》</text>
+      <text class="agreement-link text-sm" bindtap="onOpenPrivacy">《隐私政策》</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,123 @@
+<!-- pages/feedback/feedback.wxml — 通话反馈表单 -->
+<view class="feedback-page">
+  <!-- 顶部导航 -->
+  <view class="top-bar" style="padding-top: {{statusBarHeight + 8}}px;">
+    <view class="back-btn" bindtap="onCancel">
+      <text class="back-icon">✕</text>
+    </view>
+    <text class="top-bar-title">记录本次通话</text>
+    <view style="width:36px;"></view>
+  </view>
+
+  <scroll-view class="scroll-area" scroll-y enhanced show-scrollbar="{{false}}">
+    <!-- 老人信息 -->
+    <view class="elderly-info" wx:if="{{elderlyName}}">
+      <text class="elderly-label text-xs text-meta">通话对象</text>
+      <text class="elderly-name font-semibold">{{elderlyName}}</text>
+    </view>
+
+    <!-- AI 状态提示 -->
+    <view class="ai-status" wx:if="{{aiLoading}}">
+      <text class="text-sm text-meta">🤖 AI 正在生成预填草稿...</text>
+    </view>
+    <view class="ai-status ai-done" wx:elif="{{aiStatus === 'done'}}">
+      <text class="text-sm text-success">🤖 AI 已生成草稿，可修改后提交</text>
+    </view>
+
+    <!-- 通话时长 -->
+    <view class="form-group">
+      <text class="form-label text-sm font-semibold">通话时长（分钟）<text class="required">*</text></text>
+      <picker
+        mode="selector"
+        range="{{durationOptions}}"
+        value="{{durationIndex}}"
+        bindchange="onDurationChange"
+      >
+        <view class="form-input picker-display">
+          <text class="{{durationMin ? '' : 'picker-placeholder'}}">{{durationMin ? durationMin + ' 分钟' : '请选择通话时长'}}</text>
+          <text class="picker-arrow">▾</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 通话摘要 -->
+    <view class="form-group">
+      <text class="form-label text-sm font-semibold">通话摘要</text>
+      <textarea
+        class="form-textarea"
+        placeholder="简要描述本次通话内容..."
+        value="{{summary}}"
+        bindinput="onSummaryInput"
+        maxlength="500"
+        auto-height
+      />
+      <text class="form-hint text-xs text-meta">{{summary.length || 0}}/500</text>
+    </view>
+
+    <!-- 心情 -->
+    <view class="form-group">
+      <text class="form-label text-sm font-semibold">老人心情</text>
+      <view class="mood-options">
+        <view
+          class="mood-item {{mood === item ? 'active' : ''}}"
+          wx:for="{{['良好', '一般', '低落']}}"
+          wx:key="*this"
+          data-mood="{{item}}"
+          bindtap="onMoodTap"
+        >
+          <text class="mood-emoji">
+            <block wx:if="{{item === '良好'}}">😊</block>
+            <block wx:elif="{{item === '一般'}}">😐</block>
+            <block wx:else>😔</block>
+          </text>
+          <text class="mood-text text-xs">{{item}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 标签 -->
+    <view class="form-group">
+      <text class="form-label text-sm font-semibold">通话标签（多选）</text>
+      <view class="tag-options">
+        <view
+          class="tag-item {{item.checked ? 'active' : ''}}"
+          wx:for="{{tagList}}"
+          wx:key="name"
+          data-index="{{index}}"
+          bindtap="onTagTap"
+        >
+          <text>{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 下次建议话题 -->
+    <view class="form-group">
+      <text class="form-label text-sm font-semibold">下次建议话题</text>
+      <view class="suggestion-inputs">
+        <view class="sug-input-row" wx:for="{{suggestions}}" wx:key="index">
+          <text class="sug-input-num">{{index + 1}}</text>
+          <input
+            class="form-input sug-input"
+            placeholder="建议话题 {{index + 1}}"
+            value="{{item}}"
+            data-index="{{index}}"
+            bindinput="onSuggestionInput"
+            maxlength="100"
+          />
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部留白 -->
+    <view style="height:100px;"></view>
+  </scroll-view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-bar safe-area-bottom">
+    <button class="btn-cancel" bindtap="onCancel" disabled="{{submitting}}">放弃</button>
+    <button class="btn-submit" bindtap="onSubmit" disabled="{{submitting || submitted}}">
+      {{submitting ? '提交中...' : (submitted ? '已保存' : '提交记录')}}
+    </button>
+  </view>
+</view>

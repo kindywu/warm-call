@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "screen-login.html",
+  "entry": "screen-login.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-07-10T10:57:46.750Z",
+  "updatedAt": "2026-07-10T10:57:46.750Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

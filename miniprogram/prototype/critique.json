@@ -1,0 +1,11 @@
+{
+  "kind": "critique-panel",
+  "score": 5,
+  "axes": {
+    "clarity":      { "score": 5, "notes": "手机号+验证码流程清晰，输入状态和错误提示完整" },
+    "hierarchy":    { "score": 5, "notes": "Hero → 手机号 → 验证码 → 登录按钮，自上而下符合表单直觉" },
+    "typography":   { "score": 5, "notes": "Claude 设计系统：Georgia 标题 + system-ui 正文，字号层次分明" },
+    "motion":       { "score": 5, "notes": "倒计时按钮状态切换自然，登录按钮 press 反馈到位" },
+    "brand":        { "score": 5, "notes": "羊皮纸底 + 赤陶色 accent，完全遵循 Claude 暖色系统" }
+  }
+}

@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>暖心通话 — 老人来电</title>
+  <style>
+    :root {
+      --bg: #f5f4ed; --surface: #faf9f5; --fg: #141413; --muted: #5e5d59; --meta: #87867f;
+      --border: #f0eee6; --border-warm: #e8e6dc; --accent: #c96442; --dark: #30302e;
+      --danger: #b53333; --success: #17a34a;
+      --font-display: Georgia, "Times New Roman", serif;
+      --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --font-mono: ui-monospace, "JetBrains Mono", Menlo, monospace;
+    }
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    html { -webkit-text-size-adjust:100%; }
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; background:#1a1a18; font-family:var(--font-body); -webkit-font-smoothing:antialiased; }
+    button { font:inherit; cursor:pointer; border:0; background:none; }
+
+    .phone {
+      width:390px; height:844px; background:#141413; border-radius:40px; overflow:hidden;
+      display:flex; flex-direction:column; border:3px solid #3d3d3a; position:relative;
+      box-shadow:0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    .call-screen {
+      flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:48px 32px 40px;
+      background:linear-gradient(180deg, #1e1e1c 0%, #141413 55%, #0e0e0d 100%);
+    }
+
+    .emergency-badge {
+      display:inline-flex; align-items:center; gap:6px; padding:6px 18px; border-radius:999px;
+      font-size:13px; font-weight:600; letter-spacing:0.02em; margin-bottom:36px;
+      cursor:pointer; user-select:none; transition:opacity 0.15s ease;
+    }
+    .emergency-badge:active { opacity:0.7; }
+    .urgent {
+      background:color-mix(in oklch, var(--danger) 16%, transparent);
+      color:#f28b82; border:1px solid color-mix(in oklch, var(--danger) 30%, transparent);
+    }
+    .normal {
+      background:color-mix(in oklch, var(--success) 16%, transparent);
+      color:#81c995; border:1px solid color-mix(in oklch, var(--success) 30%, transparent);
+    }
+    .badge-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+    .urgent .badge-dot { background:#f28b82; animation:dot-blink 1s ease-in-out infinite; }
+    .normal .badge-dot { background:#81c995; }
+    @keyframes dot-blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+    .call-avatar-wrap { position:relative; margin-bottom:28px; }
+    .call-avatar {
+      width:100px; height:100px; border-radius:50%; display:grid; place-items:center;
+      font-family:var(--font-display); font-size:38px; font-weight:600; color:#faf9f5;
+      letter-spacing:0.02em; position:relative; z-index:2;
+    }
+    .av-female { background:var(--accent); } .av-male { background:var(--muted); }
+
+    .ring-pulse {
+      position:absolute; inset:-16px; border-radius:50%;
+      border:2px solid color-mix(in oklch, var(--accent) 25%, transparent);
+      animation:ring-expand 2.2s cubic-bezier(0.25, 0, 0, 1) infinite; z-index:1;
+    }
+    .ring-pulse-2 {
+      position:absolute; inset:-32px; border-radius:50%;
+      border:1.5px solid color-mix(in oklch, var(--accent) 14%, transparent);
+      animation:ring-expand 2.2s cubic-bezier(0.25, 0, 0, 1) 0.6s infinite; z-index:1;
+    }
+    .ring-pulse-3 {
+      position:absolute; inset:-52px; border-radius:50%;
+      border:1px solid color-mix(in oklch, var(--accent) 7%, transparent);
+      animation:ring-expand 2.2s cubic-bezier(0.25, 0, 0, 1) 1.2s infinite; z-index:1;
+    }
+    @keyframes ring-expand {
+      0% { transform:scale(0.92); opacity:1; }
+      100% { transform:scale(1.12); opacity:0; }
+    }
+
+    .call-name {
+      font-family:var(--font-display); font-size:26px; font-weight:600;
+      color:#faf9f5; letter-spacing:-0.01em; margin-bottom:4px;
+    }
+    .call-status-text { font-size:14px; color:#b0aea5; }
+
+    .call-info-card {
+      margin-top:32px; background:color-mix(in oklch, var(--dark) 60%, #141413);
+      border:1px solid #3d3d3a; border-radius:14px; padding:14px 18px;
+      width:100%; max-width:300px;
+    }
+    .call-info-row {
+      display:flex; align-items:center; gap:8px; font-size:13px; color:#b0aea5; line-height:1.6;
+    }
+    .call-info-row + .call-info-row { margin-top:6px; }
+    .info-label { color:#87867f; flex-shrink:0; min-width:56px; font-size:12px; }
+    .info-value { color:#faf9f5; }
+    .info-value.warn { color:#f28b82; }
+
+    .call-actions {
+      display:flex; gap:32px; margin-top:56px; align-items:center;
+    }
+    .action-btn {
+      width:64px; height:64px; border-radius:50%; display:grid; place-items:center;
+      transition:transform 0.15s ease, box-shadow 0.2s ease;
+      box-shadow:0 4px 20px rgba(0,0,0,0.3);
+    }
+    .action-btn:active { transform:scale(0.88); }
+    .btn-decline { background:var(--danger); }
+    .btn-decline:hover { box-shadow:0 4px 28px color-mix(in oklch, var(--danger) 40%, transparent); }
+    .btn-accept { background:var(--success); }
+    .btn-accept:hover { box-shadow:0 4px 28px color-mix(in oklch, var(--success) 40%, transparent); }
+    .action-btn svg { width:28px; height:28px; stroke:#faf9f5; fill:none; stroke-width:2; }
+
+    .action-label {
+      font-size:12px; color:#87867f; text-align:center; margin-top:8px;
+    }
+    .action-col { display:flex; flex-direction:column; align-items:center; }
+
+    .call-dismiss {
+      margin-top:40px; font-size:14px; color:#5e5d59;
+      padding:8px 20px; border-radius:999px;
+      transition:color 0.15s ease, background 0.15s ease;
+    }
+    .call-dismiss:hover { color:#b0aea5; background:rgba(255,255,255,0.05); }
+
+    @media (max-width:430px) {
+      .phone { width:100vw; height:100vh; border-radius:0; border:0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="phone" data-od-id="phone-incoming-call">
+    <div class="call-screen">
+      <div class="emergency-badge urgent" id="emergencyBadge" data-od-id="emergency-badge" onclick="setUrgent(!isUrgent)" title="点击切换紧急/普通">
+        <span class="badge-dot"></span> 紧急来电
+      </div>
+
+      <div class="call-avatar-wrap" data-od-id="caller-avatar">
+        <div class="ring-pulse"></div>
+        <div class="ring-pulse-2"></div>
+        <div class="ring-pulse-3"></div>
+        <div class="call-avatar av-female">张</div>
+      </div>
+
+      <div class="call-name" id="callerName">张书华</div>
+      <div class="call-status-text">老人来电 — 请接听</div>
+
+      <div class="call-info-card" data-od-id="call-info">
+        <div class="call-info-row">
+          <span class="info-label">上次通话</span>
+          <span class="info-value">3 天前联系过</span>
+        </div>
+        <div class="call-info-row">
+          <span class="info-label">通话时长</span>
+          <span class="info-value">25 分钟</span>
+        </div>
+        <div class="call-info-row">
+          <span class="info-label">最近心情</span>
+          <span class="info-value warn" id="moodStatus">情绪低落</span>
+        </div>
+        <div class="call-info-row">
+          <span class="info-label">备注</span>
+          <span class="info-value">上次提到身体不适，需特别关注</span>
+        </div>
+      </div>
+
+      <div class="call-actions" data-od-id="call-actions">
+        <div class="action-col">
+          <button class="action-btn btn-decline" onclick="handleDecline()" aria-label="挂断">
+            <svg viewBox="0 0 24 24"><path d="M10.68 13.32a16 16 0 003.41 2.51l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07M23 1L1 23"/></svg>
+          </button>
+          <span class="action-label">挂断</span>
+        </div>
+        <div class="action-col">
+          <button class="action-btn btn-accept" onclick="handleAccept()" aria-label="接听">
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          </button>
+          <span class="action-label">接听</span>
+        </div>
+      </div>
+
+      <button class="call-dismiss" onclick="handleDecline()">稍后回拨</button>
+    </div>
+  </div>
+
+  <script>
+    var isUrgent = true;
+    function setUrgent(v) {
+      isUrgent = v;
+      var badge = document.getElementById('emergencyBadge');
+      var mood  = document.getElementById('moodStatus');
+      if (v) {
+        badge.className = 'emergency-badge urgent';
+        badge.innerHTML = '<span class="badge-dot"></span> 紧急来电';
+        mood.className = 'info-value warn';
+        mood.textContent = '情绪低落';
+      } else {
+        badge.className = 'emergency-badge normal';
+        badge.innerHTML = '<span class="badge-dot"></span> 普通来电';
+        mood.className = 'info-value';
+        mood.textContent = '稳定';
+      }
+    }
+    function handleAccept() {
+      var badge = document.getElementById('emergencyBadge');
+      var phone = document.querySelector('.phone');
+      phone.style.transition = 'opacity 0.6s ease';
+      phone.style.opacity = '0';
+      setTimeout(function() { phone.style.opacity = '1'; }, 1200);
+    }
+    function handleDecline() {
+      var phone = document.querySelector('.phone');
+      phone.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+      phone.style.transform = 'scale(0.85)';
+      phone.style.opacity = '0.3';
+      setTimeout(function() { phone.style.transform = ''; phone.style.opacity = '1'; }, 600);
+    }
+  </script>
+</body>
+</html>
