@@ -57,6 +57,10 @@ Page({
     const app = getApp();
     const { elderlyId, elderlyName, startTime } = options;
 
+    // 消费 pendingDial 标记：反馈页一旦打开即视为已处理，
+    // 避免 onShow 重复跳转导致多次打开反馈页 / 重复提交通话记录
+    app.globalData.pendingDial = null;
+
     if (!elderlyId) {
       wx.showToast({ title: '参数错误', icon: 'none' });
       setTimeout(() => wx.navigateBack(), 1000);
@@ -187,13 +191,15 @@ Page({
         throw new Error('保存通话记录失败');
       }
 
-      // 2. 更新老人的 lastCallAt（使用时间戳数字，避免 WX SDK update() 对 Date 的序列化问题）
+      // 2. 更新老人的 lastCallAt（冗余缓存，仅供详情页徽标使用；
+      //    「今日已联系」已改为从 call_records 统计，故此更新失败不再影响今日计数）
       const updateRes = await updateDocument(COLLECTIONS.ELDERLY, elderlyId, {
         lastCallAt: startTime,
         lastCallStatus: 'done',
       });
       if (!updateRes.success) {
-        console.error('[feedback] 更新 lastCallAt 失败:', updateRes.error);
+        // updated:0 多为「值未变化」（如重复提交），属正常，降级为 warn
+        console.warn('[feedback] 更新 lastCallAt 未生效（可能值未变化或文档不存在），通话记录已保存:', updateRes.error);
       } else {
         console.log('[feedback] 已更新 lastCallAt:', new Date(startTime).toISOString());
       }

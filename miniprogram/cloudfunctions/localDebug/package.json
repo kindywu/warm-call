@@ -1,7 +1,7 @@
 {
-  "name": "search",
+  "name": "localDebug",
   "version": "1.0.0",
-  "description": "暖心通话 · 简单搜索云函数",
+  "description": "暖心通话 · 本地调试/诊断云函数",
   "main": "index.js",
   "dependencies": {
     "wx-server-sdk": "~3.0.0"

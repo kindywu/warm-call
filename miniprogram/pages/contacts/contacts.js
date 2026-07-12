@@ -1,7 +1,7 @@
 // pages/contacts/contacts.js — 老人列表（首页 · Tab1）
 const { queryCollection } = require('../../utils/cloud');
 const { getVolunteer, requireAuth } = require('../../utils/auth');
-const { FILTER_TYPES, CALL_STATUS, OVERDUE_DAYS } = require('../../utils/constants');
+const { FILTER_TYPES, CALL_STATUS, OVERDUE_DAYS, COLLECTIONS } = require('../../utils/constants');
 const { formatDate, formatRelative, getOverdueDays, isToday } = require('../../utils/format');
 
 Page({
@@ -71,18 +71,24 @@ Page({
   async loadElderlyList() {
     this.setData({ loading: true });
 
-    const res = await queryCollection('elderly', {
+    const res = await queryCollection(COLLECTIONS.ELDERLY, {
       orderBy: { field: 'priorityLevel', direction: 'desc' },
     });
 
     if (res.success) {
+      // 「今日已联系」以权威的通话记录 call_records 为准，
+      // 不再依赖 elderly.lastCallAt（该字段更新失败也不会影响今日计数）
+      // 同时取每位老人最近一条通话摘要，供展开面板显示
+      const { todaySet, latestByElderly } = await this.getCallRecordsDigest();
+
       const list = res.data.map(item => {
         const overdueDays = getOverdueDays(item.lastCallAt);
-        const isTodayCall = isToday(item.lastCallAt);
+        const contactedToday = todaySet.has(item._id);
+        const latest = latestByElderly.get(item._id);
         let callStatus = CALL_STATUS.NONE;
         let callStatusLabel = '';
 
-        if (isTodayCall) {
+        if (contactedToday) {
           callStatus = CALL_STATUS.TODAY;
           callStatusLabel = '今天联系过';
         } else if (overdueDays > OVERDUE_DAYS || item.priorityLevel >= 1) {
@@ -100,6 +106,8 @@ Page({
           callStatus,
           callStatusLabel,
           overdueDays,
+          contactedToday,
+          lastSummary: latest && latest.summary ? latest.summary : '',
           surname: item.name ? item.name[0] : '?',
         };
       });
@@ -119,6 +127,45 @@ Page({
       this.setData({ loading: false });
       wx.showToast({ title: '加载失败', icon: 'none' });
     }
+  },
+
+  /**
+   * 从 call_records 汇总（权威来源，一次查询）：
+   *  - todaySet：今天已联系的老人 ID 集合
+   *  - latestByElderly：每位老人「最近一条」通话记录（含 summary）
+   */
+  async getCallRecordsDigest() {
+    const todaySet = new Set();
+    const latestByElderly = new Map();
+    try {
+      // 按 startTime 倒序取最近 100 条：
+      // 微信云开发 .get() 默认仅返回前 20 条且无排序，
+      // 若不排序，最新的今日通话可能排在第 20 条之后而漏统计。
+      const res = await queryCollection(COLLECTIONS.CALL_RECORDS, {
+        orderBy: { field: 'startTime', direction: 'desc' },
+        limit: 100,
+      });
+      if (res.success && res.data) {
+        res.data.forEach(r => {
+          if (!r.elderlyId) return;
+
+          // 今日集合
+          if (isToday(r.startTime)) {
+            todaySet.add(r.elderlyId);
+          }
+
+          // 最近一条（按 startTime 取最大）
+          const t = r.startTime ? new Date(r.startTime).getTime() : 0;
+          const prev = latestByElderly.get(r.elderlyId);
+          if (!prev || t > prev.time) {
+            latestByElderly.set(r.elderlyId, { time: t, summary: r.summary || '' });
+          }
+        });
+      }
+    } catch (e) {
+      console.error('[contacts] 加载通话记录失败:', e);
+    }
+    return { todaySet, latestByElderly };
   },
 
   /** ===== 搜索 ===== */

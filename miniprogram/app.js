@@ -34,6 +34,12 @@ App({
       setTimeout(() => {
         const pending = this.globalData.pendingDial;
         if (pending && pending.elderlyId) {
+          // 守卫：若反馈页已在页面栈顶，则不再重复跳转（避免重复打开/重复提交）
+          const pages = getCurrentPages();
+          const top = pages[pages.length - 1];
+          if (top && top.route === 'pages/feedback/feedback') {
+            return;
+          }
           wx.navigateTo({
             url: `/pages/feedback/feedback?elderlyId=${pending.elderlyId}&elderlyName=${encodeURIComponent(pending.elderlyName || '')}&startTime=${pending.startTime || ''}`,
             fail: (err) => {
@@ -77,5 +83,8 @@ App({
     statusBarHeight: 20,
     // 屏幕宽度
     screenWidth: 375,
+    // ⚙️ 调试开关：true=开发期，云函数/数据库错误自动弹 toast 便于排查；
+    // 上线前务必改为 false，生产期错误静默（仅 console）。
+    DEBUG: true,
   },
 });

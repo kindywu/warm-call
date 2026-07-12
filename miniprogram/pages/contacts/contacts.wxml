@@ -122,10 +122,10 @@
         <view class="expand-panel {{expandedId === item._id ? 'open' : ''}}">
           <block wx:if="{{expandedId === item._id}}">
             <!-- 上次通话摘要 -->
-            <view class="expand-section" wx:if="{{item.lastCallAt}}">
+            <view class="expand-section" wx:if="{{item.lastSummary || item.lastCallAt}}">
               <text class="expand-label text-xs text-meta">📝 上次通话 {{item.callStatusLabel}}</text>
               <text class="expand-summary text-sm">
-                {{item.lastSummary || '暂无通话记录，可查看详情页面了解更多信息。'}}
+                {{item.lastSummary || '暂无通话摘要，可查看详情页面了解更多信息。'}}
               </text>
             </view>
 
