@@ -89,7 +89,11 @@ async function addDocument(collection, data) {
 async function updateDocument(collection, docId, data) {
   const db = wx.cloud.database();
   try {
-    await db.collection(collection).doc(docId).update({ data });
+    const res = await db.collection(collection).doc(docId).update({ data });
+    if (res.stats && res.stats.updated === 0) {
+      console.warn(`[db] 更新文档 ${collection}/${docId} 未命中（文档不存在或无变化）`);
+      return { success: false, data: null, error: '文档未找到或无变化' };
+    }
     return { success: true, data: { _id: docId }, error: null };
   } catch (err) {
     console.error(`[db] 更新文档 ${collection}/${docId} 失败:`, err);

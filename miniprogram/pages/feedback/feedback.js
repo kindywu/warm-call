@@ -187,11 +187,16 @@ Page({
         throw new Error('保存通话记录失败');
       }
 
-      // 2. 更新老人的 lastCallAt
-      await updateDocument(COLLECTIONS.ELDERLY, elderlyId, {
-        lastCallAt: new Date(startTime),
+      // 2. 更新老人的 lastCallAt（使用时间戳数字，避免 WX SDK update() 对 Date 的序列化问题）
+      const updateRes = await updateDocument(COLLECTIONS.ELDERLY, elderlyId, {
+        lastCallAt: startTime,
         lastCallStatus: 'done',
       });
+      if (!updateRes.success) {
+        console.error('[feedback] 更新 lastCallAt 失败:', updateRes.error);
+      } else {
+        console.log('[feedback] 已更新 lastCallAt:', new Date(startTime).toISOString());
+      }
 
       // 3. 清除 pendingDial
       const app = getApp();

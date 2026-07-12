@@ -2,7 +2,7 @@
 const { queryCollection } = require('../../utils/cloud');
 const { getVolunteer, requireAuth } = require('../../utils/auth');
 const { FILTER_TYPES, CALL_STATUS, OVERDUE_DAYS } = require('../../utils/constants');
-const { formatDate, formatRelative, getOverdueDays } = require('../../utils/format');
+const { formatDate, formatRelative, getOverdueDays, isToday } = require('../../utils/format');
 
 Page({
   data: {
@@ -78,11 +78,11 @@ Page({
     if (res.success) {
       const list = res.data.map(item => {
         const overdueDays = getOverdueDays(item.lastCallAt);
-        const isToday = overdueDays === 0;
+        const isTodayCall = isToday(item.lastCallAt);
         let callStatus = CALL_STATUS.NONE;
         let callStatusLabel = '';
 
-        if (isToday) {
+        if (isTodayCall) {
           callStatus = CALL_STATUS.TODAY;
           callStatusLabel = '今天联系过';
         } else if (overdueDays > OVERDUE_DAYS || item.priorityLevel >= 1) {

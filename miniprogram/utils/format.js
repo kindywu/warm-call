@@ -82,16 +82,43 @@ function formatRelative(date) {
 }
 
 /**
- * 计算超期天数
+ * 今天零点（本地时区）
+ * 全小程序统一使用此函数界定「自然日」，避免各页面口径不一。
+ * @returns {Date}
+ */
+function startOfToday() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+/**
+ * 判断给定时间是否为今天（本地自然日）
+ * @param {Date|string|number} date
+ * @returns {boolean}
+ */
+function isToday(date) {
+  if (!date) return false;
+  const t = date instanceof Date ? date.getTime() : new Date(date).getTime();
+  if (isNaN(t)) return false;
+  return t >= startOfToday().getTime();
+}
+
+/**
+ * 计算距今天数（自然日口径，与 startOfToday 一致）
  * @param {Date|string|number} lastCallAt
- * @returns {number} 超期天数，无记录返回 Infinity
+ * @returns {number} 距今天数，无记录返回 Infinity；今天返回 0
  */
 function getOverdueDays(lastCallAt) {
   if (!lastCallAt) return Infinity;
   const last = lastCallAt instanceof Date ? lastCallAt.getTime() : new Date(lastCallAt).getTime();
   if (isNaN(last)) return Infinity;
-  const now = Date.now();
-  return Math.floor((now - last) / 86400000);
+  const today = startOfToday();
+  if (last >= today.getTime()) return 0;
+  const lastDay = new Date(last);
+  lastDay.setHours(0, 0, 0, 0);
+  // 用日期差而非纯毫秒，规避时区/夏令时导致的边界误差（中国无夏令时，仍保持稳健）
+  return Math.round((today.getTime() - lastDay.getTime()) / 86400000);
 }
 
 /**
@@ -111,6 +138,8 @@ module.exports = {
   formatDuration,
   formatDurationCompact,
   formatRelative,
+  startOfToday,
+  isToday,
   getOverdueDays,
   formatPhone,
 };
